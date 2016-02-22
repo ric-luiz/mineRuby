@@ -39,57 +39,103 @@ class Jogador
 
             #Montando as  imagens das partes do corpo do personagem
             @cabeca = @tiled.frame(2)
-            # @tronco = @tiled.frame(1)
-            #
-            # #Detalhe: 2 braços
-            # @bracoLeft = @tiled.frame(0)
-            # @bracoRight = @bracoLeft
-            #
-            # #Detalhe: 2 pernas
-            # @pernaLeft = @tiled.frame(3)
-            # @pernaRight = @pernaLeft
+            @tronco = @tiled.frame(1)
+
+            #Angulo da movimetação dos braços
+            @movimentacao = 0.0
+            #Sobrescrita dos braços
+            @sobre1 = 1
+            @sobre2 = 2
+
+            #Detalhe: 2 braços
+            @bracoLeft = @tiled.frame(0)
+            @bracoRight = @bracoLeft
+
+            #Detalhe: 2 pernas
+            @pernaLeft = @tiled.frame(3)
+            @pernaRight = @pernaLeft
 
             @space = space
 
             definirCorpo()
       end
 
+      def left
+            # @corpo.body.apply_force((radians_to_vec2() * (40.0/6)), CP::Vec2.new(0.0, 0.0))
+            movimentacaoMembros()
+      end
+
+      def right
+            # @corpo.body.apply_force((radians_to_vec2(@corpo.body.a) * (40.0/6)), CP::Vec2.new(0.0, 0.0))
+            movimentacaoMembros()
+      end
+
       def draw
+            #Fazer os membros balançarem para ambos os lados
+            puts @movimentacao
+            if @movimentacao >= 60 or @movimentacao <= -60
+                  @movimentacao*=-1
+                  #Mudando a sobreposição dos membros
+                  s1 = @sobre1
+                  s2 = @sobre2
+                  @sobre1 = s2
+                  @sobre2 = s1
+            end
+
             #Define a posição dos elementos do corpo do personagem
-            # definirPosicao()
+            definirPosicao()
 
-            @cabeca.draw_rot(@corpo.body.p.x,@corpo.body.p.y,
-                             1,@corpo.body.a.radians_to_gosu)
+            @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,
+                             2,0,
+                             0,0)
 
-            # @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
-            #                  1,@corpo.body.a.radians_to_gosu)
-            #
-            # @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
-            #                     1,@corpo.body.a.radians_to_gosu)
-            #
-            # @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
-            #                     1,@corpo.body.a.radians_to_gosu)
-            #
-            # @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
-            #                     1,@corpo.body.a.radians_to_gosu)
+            @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
+                             2,0,
+                             0,0)
+
+            @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
+                                @sobre1,@movimentacao,
+                                0.5,0)
+
+            @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
+                                 @sobre2,-@movimentacao,
+                                 0.5,0)
+
+            @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
+                                @sobre1,@movimentacao,
+                                0.5,0)
+            @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,
+                                 @sobre2,-@movimentacao,
+                                 0.5,0)
+      end
+
+      #Fazendo os membro se mexerem
+      def movimentacaoMembros
+            @movimentacao += 1
+      end
+
+      # Convenience method for converting from radians to a Vec2 vector.
+      def radians_to_vec2()
+            CP::Vec2.new(@corpo.body.p.x,@corpo.body.p.y)
+      #   CP::Vec2.new(Math::cos(radians), Math::sin(radians))
       end
 
       def definirCorpo()
             body = CP::Body.new(10.0,300.0)
 
-            shape_array = [CP::Vec2.new(-12.5, -35), CP::Vec2.new(-12.5, 35),
-                           CP::Vec2.new(12.5, 35), CP::Vec2.new(12.5, -35)]
+            shape_array = [CP::Vec2.new(-12.5, -40.5), CP::Vec2.new(-12.5, 40.5),
+                           CP::Vec2.new(12.5, 40.5), CP::Vec2.new(12.5, -40.5)]
             shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(0,0))
             shape.collision_type = :jogador
 
-            # shape.u = FRICTION
-            # shape.e = ELASTICITY
+            shape.u = FRICTION
+            shape.e = ELASTICITY
 
             @space.add_body(body)
             @space.add_shape(shape)
 
-            shape.body.p = CP::Vec2.new(200.0, 100.0) # position
-            shape.body.v = CP::Vec2.new(0.0, 0.0) # velocity
+            shape.body.p = CP::Vec2.new(200, 100.0) # position
+            shape.body.v = CP::Vec2.new(5.0, 0.0) # velocity
             shape.body.a = (3*Math::PI/2.0)
 
             @corpo = shape
@@ -97,17 +143,17 @@ class Jogador
 
       def definirPosicao
 
-            @posicaoCabecaX = @corpo.body.p.x
-            @posicaoCabecaY = @corpo.body.p.y - @tronco.height
+            @posicaoCabecaX = @corpo.body.p.x + 12.5
+            @posicaoCabecaY = @corpo.body.p.y
 
-            @posicaoTroncoX = @corpo.body.p.x
-            @posicaoTroncoY = @corpo.body.p.y
+            @posicaoTroncoX = @corpo.body.p.x + 4 +12.5
+            @posicaoTroncoY = @corpo.body.p.y + @cabeca.height
 
-            @posicaoBracoX = @corpo.body.p.x + @cabeca.width/2 - @tronco.width/2 - 4
-            @posicaoBracoY = @corpo.body.p.y
+            @posicaoBracoX = @corpo.body.p.x + @cabeca.width/2 + 12
+            @posicaoBracoY = @corpo.body.p.y + @cabeca.height
 
-            @posicaoPernaX = @corpo.body.p.x
-            @posicaoPernaY = @corpo.body.p.y + @tronco.height
+            @posicaoPernaX = @corpo.body.p.x + 12.5 + 12
+            @posicaoPernaY = @corpo.body.p.y + @tronco.height + @cabeca.height
       end
 end
 
@@ -251,7 +297,11 @@ class GameWindow < Gosu::Window
             6.times do
                   #Importante para da andamento nos elementos da fisica no space
                   @physical.space.step(@physical.dt)
+
+                  @jogador.left() if button_down?(Gosu::KbLeft)
+                  @jogador.right() if button_down?(Gosu::KbRight)
             end
+            self.caption = "#{Gosu.fps} FPS."
       end
 
       def draw
