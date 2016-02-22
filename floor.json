@@ -1,0 +1,40 @@
+{ "height":1,
+ "layers":[
+        {
+         "data":[22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22],
+         "height":1,
+         "name":"Camada de Tiles 1",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":32,
+         "x":0,
+         "y":0
+        }],
+ "orientation":"orthogonal",
+ "properties":
+    {
+
+    },
+ "renderorder":"right-down",
+ "tileheight":50,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "image":"nove2.png",
+         "imageheight":250,
+         "imagewidth":950,
+         "margin":0,
+         "name":"nove2",
+         "properties":
+            {
+
+            },
+         "spacing":0,
+         "tileheight":50,
+         "tilewidth":50
+        }],
+ "tilewidth":50,
+ "version":1,
+ "width":32
+}
