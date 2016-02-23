@@ -36,6 +36,7 @@ class Jogador
       def initialize(space)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('cara.json')
+            # @imagem = Gosu::Image.new('male_head.png');
 
             #Montando as  imagens das partes do corpo do personagem
             @cabeca = @tiled.frame(2)
@@ -62,17 +63,18 @@ class Jogador
 
       def left
             # @corpo.body.apply_force((radians_to_vec2() * (40.0/6)), CP::Vec2.new(0.0, 0.0))
+            @corpo.body.apply_impulse(CP::Vec2.new(-10, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
       end
 
       def right
             # @corpo.body.apply_force((radians_to_vec2(@corpo.body.a) * (40.0/6)), CP::Vec2.new(0.0, 0.0))
+            @corpo.body.apply_impulse(CP::Vec2.new(10, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
       end
 
       def draw
             #Fazer os membros balançarem para ambos os lados
-            puts @movimentacao
             if @movimentacao >= 60 or @movimentacao <= -60
                   @movimentacao*=-1
                   #Mudando a sobreposição dos membros
@@ -89,24 +91,26 @@ class Jogador
                              2,0,
                              0,0)
 
-            @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
-                             2,0,
-                             0,0)
+            # @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
+            #                  2,0,
+            #                  0,0)
 
-            @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
-                                @sobre1,@movimentacao,
-                                0.5,0)
+            # @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
+            #                     @sobre1,@movimentacao,
+            #                     0.5,0)
+            #
+            # @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
+            #                      @sobre2,-@movimentacao,
+            #                      0.5,0)
+            #
+            # @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
+            #                     @sobre1,@movimentacao,
+            #                     0.5,0)
+            # @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,
+            #                      @sobre2,-@movimentacao,
+            #                      0.5,0)
 
-            @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
-                                 @sobre2,-@movimentacao,
-                                 0.5,0)
-
-            @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
-                                @sobre1,@movimentacao,
-                                0.5,0)
-            @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,
-                                 @sobre2,-@movimentacao,
-                                 0.5,0)
+            # @imagem.draw(@corpo.body.p.x,@corpo.body.p.y,1)
       end
 
       #Fazendo os membro se mexerem
@@ -123,8 +127,8 @@ class Jogador
       def definirCorpo()
             body = CP::Body.new(10.0,300.0)
 
-            shape_array = [CP::Vec2.new(-12.5, -40.5), CP::Vec2.new(-12.5, 40.5),
-                           CP::Vec2.new(12.5, 40.5), CP::Vec2.new(12.5, -40.5)]
+            shape_array = [CP::Vec2.new(-12.5, -12.5), CP::Vec2.new(-12.5, 12.5),
+                           CP::Vec2.new(12.5, 12.5), CP::Vec2.new(12.5, -12.5)]
             shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(0,0))
             shape.collision_type = :jogador
 
@@ -134,9 +138,10 @@ class Jogador
             @space.add_body(body)
             @space.add_shape(shape)
 
-            shape.body.p = CP::Vec2.new(200, 100.0) # position
+            shape.body.p = CP::Vec2.new(600, 100.0) # position
             shape.body.v = CP::Vec2.new(5.0, 0.0) # velocity
             shape.body.a = (3*Math::PI/2.0)
+            shape.object = self
 
             @corpo = shape
       end
@@ -197,11 +202,11 @@ class World
             l=0
             for layers in @camadas
                   for i in layers['data']
-                        if i > 0 and i != 22
+                        if i > 0 and (i != 22 and i != 50)
                               x = @posicoes[v][0]['posicao'][0].to_i
                               y = @posicoes[v][0]['posicao'][1].to_i
                               @img[i-1].draw(x, y, l)
-                        elsif i == 22
+                        elsif i == 22 or i == 50
                               #caso seja uma particula (objeto com fisica) desenhos ele
                               @posicoes[v].draw
                         end
@@ -226,7 +231,7 @@ class World
                         end
                         #caso o elemento seja algo solido inserimos ele como uma
                         #particula (objeto com fisica) no mapa
-                        if i == 22
+                        if i == 22 or i == 50
                               x = @c * TILE_WIDTH
                               y = @r * TILE_HEIGTH
                               posicao = inserirSpace(x,y)
@@ -252,7 +257,6 @@ class World
                            CP::Vec2.new(25.0, 25.0), CP::Vec2.new(25.0, -25.0)]
             shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(0,0))
             shape.collision_type = :particula
-
             shape.u = FRICTION
             shape.e = ELASTICITY
 
@@ -287,6 +291,11 @@ class GameWindow < Gosu::Window
 
             #Instanciando o Jogador
             @jogador = Jogador.new(@physical.space)
+
+            # @collisions = []
+            # @physical.space.add_collision_func(:jogador, :particula) do |player_shape, brush_shape|
+            #   @collisions << brush_shape
+            # end
       end
 
       def button_down(id)
@@ -307,6 +316,11 @@ class GameWindow < Gosu::Window
       def draw
             @world.draw
             @jogador.draw
+            # if @collisions and !@collisions.empty?
+            #   @jogador.draw_boundaries(0xffff2222)
+            #   @collisions.each {|c| c.object.draw_boundaries(0xffff2222)}
+            # end
+            # @collisions = []
       end
 
 end
