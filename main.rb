@@ -12,10 +12,10 @@ TILE_HEIGTH = MAP_WORLD['tileheight']
 
 
 ##################Propriedaes da Fisica(PhysicalWorld)#############
-GRAVITY = 25.0
-DAMPING = 0.5
+GRAVITY = 50.0
+DAMPING = 0.8
 FRICTION = 0.7
-ELASTICITY = 0.8
+ELASTICITY = 0.2
 ###################################################################
 
 #Seletor de frames para os personagens
@@ -33,10 +33,11 @@ class Tileset
 end
 
 class Jogador
-      def initialize(space)
+      attr_reader :shape
+      def initialize(space,win)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('cara.json')
-            # @imagem = Gosu::Image.new('male_head.png');
+            @imagem = Gosu::Image.new('male_head.png');
 
             #Montando as  imagens das partes do corpo do personagem
             @cabeca = @tiled.frame(2)
@@ -57,19 +58,19 @@ class Jogador
             @pernaRight = @pernaLeft
 
             @space = space
-
+            @window = win
             definirCorpo()
       end
 
       def left
             # @corpo.body.apply_force((radians_to_vec2() * (40.0/6)), CP::Vec2.new(0.0, 0.0))
-            @corpo.body.apply_impulse(CP::Vec2.new(-10, 0), CP::Vec2.new(0, 0))
+            @body.apply_impulse(CP::Vec2.new(-20.0, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
       end
 
       def right
             # @corpo.body.apply_force((radians_to_vec2(@corpo.body.a) * (40.0/6)), CP::Vec2.new(0.0, 0.0))
-            @corpo.body.apply_impulse(CP::Vec2.new(10, 0), CP::Vec2.new(0, 0))
+            @body.apply_impulse(CP::Vec2.new(20.0, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
       end
 
@@ -87,10 +88,13 @@ class Jogador
             #Define a posição dos elementos do corpo do personagem
             definirPosicao()
 
-            @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,
-                             2,0,
-                             0,0)
-
+            # @window.draw_quad(@body.p.x + @shape_verts[3].x, @body.p.y + @shape_verts[3].y, @color,
+            #              @body.p.x + @shape_verts[2].x, @body.p.y + @shape_verts[2].y, @color,
+            #              @body.p.x + @shape_verts[0].x, @body.p.y + @shape_verts[0].y, @color,
+            #              @body.p.x + @shape_verts[1].x, @body.p.y + @shape_verts[1].y, @color,
+            #              z=3)
+            @cabeca.draw(@posicaoCabecaX,@posicaoCabecaY,2)
+            puts @body.a.radians_to_gosu
             # @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
             #                  2,0,
             #                  0,0)
@@ -118,60 +122,76 @@ class Jogador
             @movimentacao += 1
       end
 
-      # Convenience method for converting from radians to a Vec2 vector.
-      def radians_to_vec2()
-            CP::Vec2.new(@corpo.body.p.x,@corpo.body.p.y)
-      #   CP::Vec2.new(Math::cos(radians), Math::sin(radians))
-      end
+      # # Convenience method for converting from radians to a Vec2 vector.
+      # def radians_to_vec2()
+      #       CP::Vec2.new(@corpo.body.p.x,@corpo.body.p.y)
+      # #   CP::Vec2.new(Math::cos(radians), Math::sin(radians))
+      # end
 
       def definirCorpo()
-            body = CP::Body.new(10.0,300.0)
+            @body = CP::Body.new(50.0,100/0.0)
+            @body.p = CP::Vec2.new(500, 100.0)
+            # @body.a = (3*Math::PI/2.0)
+            # @body.v = CP::Vec2.new(5.0, 0.0)
+            # @body.v_limit = 500
 
-            shape_array = [CP::Vec2.new(-12.5, -12.5), CP::Vec2.new(-12.5, 12.5),
-                           CP::Vec2.new(12.5, 12.5), CP::Vec2.new(12.5, -12.5)]
-            shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(0,0))
-            shape.collision_type = :jogador
+            @shape_verts = [CP::Vec2.new(0.0, 0.0), CP::Vec2.new(0.0, 25),
+                            CP::Vec2.new(25, 25), CP::Vec2.new(25, 0.0)]
+            @shape = CP::Shape::Poly.new(@body, @shape_verts, CP::Vec2.new(0,0))
+            @shape.collision_type = :jogador
 
-            shape.u = FRICTION
-            shape.e = ELASTICITY
+            @shape.u = FRICTION
+            @shape.e = ELASTICITY
 
-            @space.add_body(body)
+            @space.add_body(@body)
             @space.add_shape(shape)
 
-            shape.body.p = CP::Vec2.new(600, 100.0) # position
-            shape.body.v = CP::Vec2.new(5.0, 0.0) # velocity
-            shape.body.a = (3*Math::PI/2.0)
-            shape.object = self
-
-            @corpo = shape
+            @color = Gosu::Color.new(255,0,255,0)
+            # the more elastic the greener
+            @color.saturation *= ELASTICITY
+            @color.value *= ELASTICITY
       end
 
       def definirPosicao
 
-            @posicaoCabecaX = @corpo.body.p.x + 12.5
-            @posicaoCabecaY = @corpo.body.p.y
+            @posicaoCabecaX = @body.p.x
+            @posicaoCabecaY = @body.p.y
 
-            @posicaoTroncoX = @corpo.body.p.x + 4 +12.5
-            @posicaoTroncoY = @corpo.body.p.y + @cabeca.height
-
-            @posicaoBracoX = @corpo.body.p.x + @cabeca.width/2 + 12
-            @posicaoBracoY = @corpo.body.p.y + @cabeca.height
-
-            @posicaoPernaX = @corpo.body.p.x + 12.5 + 12
-            @posicaoPernaY = @corpo.body.p.y + @tronco.height + @cabeca.height
+            # @posicaoTroncoX = @corpo.body.p.x + 4 +12.5
+            # @posicaoTroncoY = @corpo.body.p.y + @cabeca.height
+            #
+            # @posicaoBracoX = @corpo.body.p.x + @cabeca.width/2 + 12
+            # @posicaoBracoY = @corpo.body.p.y + @cabeca.height
+            #
+            # @posicaoPernaX = @corpo.body.p.x + 12.5 + 12
+            # @posicaoPernaY = @corpo.body.p.y + @tronco.height + @cabeca.height
       end
 end
 
 class Particula
       attr_reader :shape
-      def initialize(posicao,imagem)
-
+      def initialize(posicao,imagem,forma,win)
+            @window = win
+            @shape_verts = forma
             @imagem = imagem
-            @posicao = posicao
+            @body = posicao
+
+            #Codigo que faz parte da impressão das formas nas shapes
+            # @color = Gosu::Color.new(255,0,255,0)
+            # the more elastic the greener
+            # @color.saturation *= ELASTICITY
+            # @color.value *= ELASTICITY
       end
 
       def draw
-            @imagem.draw(@posicao.x,@posicao.y,1)
+            @imagem.draw_rot(@body.p.x, @body.p.y, 1, 0, 0.0, 0.0)
+
+            #Codigo para depuração das shapes. Esse codigo imprime o desenho das formas no cenario
+            # @window.draw_quad(@body.p.x + @shape_verts[3].x, @body.p.y + @shape_verts[3].y, @color,
+            #              @body.p.x + @shape_verts[2].x, @body.p.y + @shape_verts[2].y, @color,
+            #              @body.p.x + @shape_verts[0].x, @body.p.y + @shape_verts[0].y, @color,
+            #              @body.p.x + @shape_verts[1].x, @body.p.y + @shape_verts[1].y, @color,
+            #              z=3)
       end
 end
 
@@ -190,7 +210,7 @@ class World
 
             #Recebendo o space
             @space = space
-
+            @window = window
             #posiciona os elementos no world
             @posicoes = []
             posicionar()
@@ -234,8 +254,9 @@ class World
                         if i == 22 or i == 50
                               x = @c * TILE_WIDTH
                               y = @r * TILE_HEIGTH
-                              posicao = inserirSpace(x,y)
-                              particula = Particula.new(posicao,@img[i-1])
+                              inserirSpace(x,y)
+                              #Os parametros @forma e @windows, servem para depuração das shapes do shipmunk
+                              particula = Particula.new(@body,@img[i-1],@forma,@window)
                               @posicoes << particula
                         else
                               @posicoes << [
@@ -250,19 +271,16 @@ class World
 
       # Cria a forma e corpo e adiciona no space
       def inserirSpace(x,y)
-            body = CP::Body.new_static
-            body.p = CP::Vec2.new(x, y)
-
-            shape_array = [CP::Vec2.new(-25.0, -25.0), CP::Vec2.new(-25.0, 25.0),
-                           CP::Vec2.new(25.0, 25.0), CP::Vec2.new(25.0, -25.0)]
-            shape = CP::Shape::Poly.new(body, shape_array, CP::Vec2.new(0,0))
+            @body = CP::Body.new_static
+            @body.p = CP::Vec2.new(x, y)
+            @forma = [CP::Vec2.new(0.0, 0.0), CP::Vec2.new(0.0, 50.0),
+                     CP::Vec2.new(50.0, 50.0), CP::Vec2.new(50.0, 0.0)]
+            shape = CP::Shape::Poly.new(@body, @forma, CP::Vec2.new(0,0))
             shape.collision_type = :particula
-            shape.u = FRICTION
-            shape.e = ELASTICITY
+            # shape.u = FRICTION
+            # shape.e = ELASTICITY
 
             @space.add_shape(shape)
-
-            return body.p
       end
 end
 
@@ -290,12 +308,7 @@ class GameWindow < Gosu::Window
             @world = World.new(self,@physical.space)
 
             #Instanciando o Jogador
-            @jogador = Jogador.new(@physical.space)
-
-            # @collisions = []
-            # @physical.space.add_collision_func(:jogador, :particula) do |player_shape, brush_shape|
-            #   @collisions << brush_shape
-            # end
+            @jogador = Jogador.new(@physical.space,self)
       end
 
       def button_down(id)
@@ -304,11 +317,12 @@ class GameWindow < Gosu::Window
 
       def update
             6.times do
-                  #Importante para da andamento nos elementos da fisica no space
-                  @physical.space.step(@physical.dt)
 
                   @jogador.left() if button_down?(Gosu::KbLeft)
                   @jogador.right() if button_down?(Gosu::KbRight)
+
+                  #Importante para da andamento nos elementos da fisica no space
+                  @physical.space.step(@physical.dt)
             end
             self.caption = "#{Gosu.fps} FPS."
       end
@@ -316,11 +330,6 @@ class GameWindow < Gosu::Window
       def draw
             @world.draw
             @jogador.draw
-            # if @collisions and !@collisions.empty?
-            #   @jogador.draw_boundaries(0xffff2222)
-            #   @collisions.each {|c| c.object.draw_boundaries(0xffff2222)}
-            # end
-            # @collisions = []
       end
 
 end
