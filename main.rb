@@ -5,17 +5,17 @@ require 'chipmunk'
 ##################Propriedades do Cenario(World)###################
 WIDTH = 800
 HEIGHT = 600
-MAP_WORLD = JSON.parse(File.read('map2.json'))
+MAP_WORLD = JSON.parse(File.read('map.json'))
 TILE_WIDTH = MAP_WORLD['tilewidth']
 TILE_HEIGTH = MAP_WORLD['tileheight']
 ###################################################################
 
 
 ##################Propriedaes da Fisica(PhysicalWorld)#############
-GRAVITY = 50.0
+GRAVITY = 25.0
 DAMPING = 0.8
 FRICTION = 0.7
-ELASTICITY = 0.2
+ELASTICITY = 0.8
 ###################################################################
 
 #Seletor de frames para os personagens
@@ -36,12 +36,12 @@ class Jogador
       attr_reader :shape
       def initialize(space,win)
             #Recuperando os pedaços do corpo do personagem
-            @tiled = Tileset.new('cara.json')
-            @imagem = Gosu::Image.new('male_head.png');
+            @tiled = Tileset.new('personagens.json')
 
             #Montando as  imagens das partes do corpo do personagem
-            @cabeca = @tiled.frame(2)
-            @tronco = @tiled.frame(1)
+            @cabeca = @tiled.frame(8)
+            @r_cabeca = @tiled.frame(9)
+            @tronco = @tiled.frame(7)
 
             #Angulo da movimetação dos braços
             @movimentacao = 0.0
@@ -50,31 +50,48 @@ class Jogador
             @sobre2 = 2
 
             #Detalhe: 2 braços
-            @bracoLeft = @tiled.frame(0)
+            @bracoLeft = @tiled.frame(6)
             @bracoRight = @bracoLeft
 
             #Detalhe: 2 pernas
-            @pernaLeft = @tiled.frame(3)
+            @pernaLeft = @tiled.frame(10)
             @pernaRight = @pernaLeft
 
+            #Definindo Varivaeis space, window e colisor
             @space = space
             @window = win
+
+            #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
+
+            #Detectando colisões. Esta sendo usada para os saltos
+            @space.add_collision_func(:jogador, :particula) do |jog, par|
+               @par = par
+               @podePular = true
+            end
       end
 
       def left
-            # @corpo.body.apply_force((radians_to_vec2() * (40.0/6)), CP::Vec2.new(0.0, 0.0))
-            @body.apply_impulse(CP::Vec2.new(-20.0, 0), CP::Vec2.new(0, 0))
+            @body.apply_impulse(CP::Vec2.new(-5.0, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
+            @QualLado = true
       end
 
       def right
-            # @corpo.body.apply_force((radians_to_vec2(@corpo.body.a) * (40.0/6)), CP::Vec2.new(0.0, 0.0))
-            @body.apply_impulse(CP::Vec2.new(20.0, 0), CP::Vec2.new(0, 0))
+            @body.apply_impulse(CP::Vec2.new(5.0, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
+            @QualLado = false
+      end
+
+      def jump
+            if @podePular and @body.p.y+60 < @par.body.p.y
+                  @body.apply_impulse(CP::Vec2.new(0.0, -700.0), CP::Vec2.new(0, 0))
+            end
+            @podePular = false
       end
 
       def draw
+
             #Fazer os membros balançarem para ambos os lados
             if @movimentacao >= 60 or @movimentacao <= -60
                   @movimentacao*=-1
@@ -88,33 +105,37 @@ class Jogador
             #Define a posição dos elementos do corpo do personagem
             definirPosicao()
 
+            #Esse trecho de codigo é usado para depuração das shapes no jogador
             # @window.draw_quad(@body.p.x + @shape_verts[3].x, @body.p.y + @shape_verts[3].y, @color,
             #              @body.p.x + @shape_verts[2].x, @body.p.y + @shape_verts[2].y, @color,
             #              @body.p.x + @shape_verts[0].x, @body.p.y + @shape_verts[0].y, @color,
             #              @body.p.x + @shape_verts[1].x, @body.p.y + @shape_verts[1].y, @color,
             #              z=3)
-            @cabeca.draw(@posicaoCabecaX,@posicaoCabecaY,2)
-            puts @body.a.radians_to_gosu
-            # @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
-            #                  2,0,
-            #                  0,0)
 
-            # @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
-            #                     @sobre1,@movimentacao,
-            #                     0.5,0)
-            #
-            # @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
-            #                      @sobre2,-@movimentacao,
-            #                      0.5,0)
-            #
-            # @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
-            #                     @sobre1,@movimentacao,
-            #                     0.5,0)
-            # @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,
-            #                      @sobre2,-@movimentacao,
-            #                      0.5,0)
+            if @QualLado
+                  @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
+            else
+                  @r_cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
+            end
 
-            # @imagem.draw(@corpo.body.p.x,@corpo.body.p.y,1)
+            @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
+                             2,0,
+                             0,0)
+
+            @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
+                                @sobre1,@movimentacao,
+                                0.5,0)
+
+            @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
+                                 @sobre2,-@movimentacao,
+                                 0.5,0)
+
+            @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
+                                @sobre1,@movimentacao,
+                                0.5,0)
+            @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,
+                                 @sobre2,-@movimentacao,
+                                 0.5,0)
       end
 
       #Fazendo os membro se mexerem
@@ -122,21 +143,14 @@ class Jogador
             @movimentacao += 1
       end
 
-      # # Convenience method for converting from radians to a Vec2 vector.
-      # def radians_to_vec2()
-      #       CP::Vec2.new(@corpo.body.p.x,@corpo.body.p.y)
-      # #   CP::Vec2.new(Math::cos(radians), Math::sin(radians))
-      # end
-
       def definirCorpo()
-            @body = CP::Body.new(50.0,100/0.0)
-            @body.p = CP::Vec2.new(500, 100.0)
-            # @body.a = (3*Math::PI/2.0)
-            # @body.v = CP::Vec2.new(5.0, 0.0)
-            # @body.v_limit = 500
+            @body = CP::Body.new(10.0,1.0/0)
+            @body.v = CP::Vec2.new(10.0, 0.0)
+            @body.v_limit = 500
+            @body.p = CP::Vec2.new(500, 100)
 
-            @shape_verts = [CP::Vec2.new(0.0, 0.0), CP::Vec2.new(0.0, 25),
-                            CP::Vec2.new(25, 25), CP::Vec2.new(25, 0.0)]
+            @shape_verts = [CP::Vec2.new(0.0, 0.0), CP::Vec2.new(0.0, 70),
+                            CP::Vec2.new(25, 70), CP::Vec2.new(25, 0.0)]
             @shape = CP::Shape::Poly.new(@body, @shape_verts, CP::Vec2.new(0,0))
             @shape.collision_type = :jogador
 
@@ -146,26 +160,28 @@ class Jogador
             @space.add_body(@body)
             @space.add_shape(shape)
 
-            @color = Gosu::Color.new(255,0,255,0)
-            # the more elastic the greener
-            @color.saturation *= ELASTICITY
-            @color.value *= ELASTICITY
+            #Usado para depuração das shapes no jogo
+            # @color = Gosu::Color.new(255,0,255,0)
+            # # the more elastic the greener
+            # @color.saturation *= ELASTICITY
+            # @color.value *= ELASTICITY
       end
 
       def definirPosicao
 
-            @posicaoCabecaX = @body.p.x
-            @posicaoCabecaY = @body.p.y
+            @posicaoCabecaX = @body.p.x + @cabeca.width/2
+            @posicaoCabecaY = @body.p.y + @cabeca.height/2
 
-            # @posicaoTroncoX = @corpo.body.p.x + 4 +12.5
-            # @posicaoTroncoY = @corpo.body.p.y + @cabeca.height
-            #
-            # @posicaoBracoX = @corpo.body.p.x + @cabeca.width/2 + 12
-            # @posicaoBracoY = @corpo.body.p.y + @cabeca.height
-            #
-            # @posicaoPernaX = @corpo.body.p.x + 12.5 + 12
-            # @posicaoPernaY = @corpo.body.p.y + @tronco.height + @cabeca.height
+            @posicaoTroncoX = @body.p.x + 2
+            @posicaoTroncoY = @body.p.y + @cabeca.height
+
+            @posicaoBracoX = @body.p.x + @cabeca.width/2
+            @posicaoBracoY = @body.p.y + @cabeca.height
+
+            @posicaoPernaX = @body.p.x + 12.5
+            @posicaoPernaY = @body.p.y + @tronco.height + @cabeca.height
       end
+
 end
 
 class Particula
@@ -206,7 +222,7 @@ class World
             @camadas = MAP_WORLD['layers']
 
             #Cortando a imagem Em pequenos pedaços
-            @img = Gosu::Image.load_tiles(window, 'nove2.png', TILE_WIDTH, TILE_HEIGTH, true)
+            @img = Gosu::Image.load_tiles(window, 'nove.png', TILE_WIDTH, TILE_HEIGTH, true)
 
             #Recebendo o space
             @space = space
@@ -277,8 +293,8 @@ class World
                      CP::Vec2.new(50.0, 50.0), CP::Vec2.new(50.0, 0.0)]
             shape = CP::Shape::Poly.new(@body, @forma, CP::Vec2.new(0,0))
             shape.collision_type = :particula
-            # shape.u = FRICTION
-            # shape.e = ELASTICITY
+            shape.u = FRICTION
+            shape.e = ELASTICITY
 
             @space.add_shape(shape)
       end
@@ -320,6 +336,7 @@ class GameWindow < Gosu::Window
 
                   @jogador.left() if button_down?(Gosu::KbLeft)
                   @jogador.right() if button_down?(Gosu::KbRight)
+                  @jogador.jump() if button_down?(Gosu::KbSpace)
 
                   #Importante para da andamento nos elementos da fisica no space
                   @physical.space.step(@physical.dt)
