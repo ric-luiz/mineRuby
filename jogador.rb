@@ -25,8 +25,11 @@ class Jogador
 
             #Definindo Varivaeis space, window e world
             @space = space
-            @window = win
-            @world = world
+            # @window = win
+            # @world = world
+
+            #Instanciando Arma do Jogador
+            @espada = Item.new(@space)
 
             #Limites do mapa para o jogador
             @limites_mapa_jogador = 800
@@ -39,6 +42,9 @@ class Jogador
                @par = par
                @podePular = true
             end
+
+            #Define para que lado a cabeça do personagem vai virar
+            @lado_movimentacao = 1
       end
 
       #Movimentação para esquerda
@@ -67,19 +73,19 @@ class Jogador
       end
 
       def draw
-
             #Fazer os membros balançarem para ambos os lados
-            if @movimentacao >= 60 or @movimentacao <= -60
-                  @movimentacao*=-1
-                  #Mudando a sobreposição dos membros
-                  s1 = @sobre1
-                  s2 = @sobre2
-                  @sobre1 = s2
-                  @sobre2 = s1
+            if @movimentacao >= 60
+                  @lado_movimentacao = -1
+            elsif @movimentacao <= -60
+                  @lado_movimentacao = 1
             end
 
             #Define a posição dos elementos do corpo do personagem
             definirPosicao()
+
+            ##Depuração da angulação dos objetos na ponta da mao
+            # puts "#{Math.cos(@movimentacao.gosu_to_radians)*@bracoLeft.height}---#{Math.sin(-@movimentacao.gosu_to_radians)*@bracoLeft.height}___#{@movimentacao}"
+            # @cabeca.draw(@pontaMaoX,@pontaMaoY,10,0.5,0.5)
 
             # # Esse trecho de codigo é usado para depuração das shapes no jogador
             # @window.draw_quad(@body.p.x + @shape_verts[3].x, @body.p.y + @shape_verts[3].y, @color,
@@ -100,39 +106,37 @@ class Jogador
                              2,0,
                              0,0)
 
-
-
             ##################Desenha os braços######################
             @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
-                                @sobre1,@movimentacao,
+                                1,@movimentacao,
                                 0.5,0)
 
             @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
-                                 @sobre2,-@movimentacao,
+                                 2,-@movimentacao,
                                  0.5,0)
             #########################################################
 
-
-
+            ############Desenha a espada do personagem###############
+            @espada.draw(@pontaMaoX,@pontaMaoY)
 
             ##################Desenha as Pernas######################
             @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
-                                @sobre1,@movimentacao,
+                                1,@movimentacao,
                                 0.5,0)
 
             @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,
-                                 @sobre2,-@movimentacao,
+                                 1,-@movimentacao,
                                  0.5,0)
             #########################################################
       end
 
       #Fazendo os membro se mexerem
       def movimentacaoMembros
-            @movimentacao += 1
+            @movimentacao += @lado_movimentacao
       end
 
       #Insere uma forma em volta do corpo do personagem para detectar colisoes e etc.
-      def definirCorpo()
+      def definirCorpo
             @body = CP::Body.new(10.0,1.0/0)
 
             @body.p = CP::Vec2.new(500, 100)
@@ -158,17 +162,25 @@ class Jogador
       #Define em quais posições vão ficar os membros do personagem
       def definirPosicao
 
+            #Define a posição da cabeça
             @posicaoCabecaX = @body.p.x + @cabeca.width/2
             @posicaoCabecaY = @body.p.y + @cabeca.height/2
 
+            #Define a posição do Tronco
             @posicaoTroncoX = @body.p.x + 2
             @posicaoTroncoY = @body.p.y + @cabeca.height
 
+            #Define a posição dos Braços
             @posicaoBracoX = @body.p.x + @cabeca.width/2
             @posicaoBracoY = @body.p.y + @cabeca.height
 
+            #Define a posição das Pernas
             @posicaoPernaX = @body.p.x + 12.5
             @posicaoPernaY = @body.p.y + @tronco.height + @cabeca.height
+
+            #Uso Conceitos da trigonometria para calular a ponta da mao através do angulo
+            @pontaMaoY = @body.p.y + @tronco.height + Math.sin(-@movimentacao.gosu_to_radians)*@bracoLeft.height
+            @pontaMaoX = @body.p.x + @tronco.width + Math.cos(@movimentacao.gosu_to_radians)*@bracoLeft.height
       end
 
 end

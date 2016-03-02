@@ -6,6 +6,7 @@ require_relative 'tileset.rb'
 require_relative 'particula.rb'
 require_relative 'world.rb'
 require_relative 'physicalWorld.rb'
+require_relative 'item.rb'
 
 ##################Propriedades do Cenario(World)###################
 WIDTH = 800
