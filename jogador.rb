@@ -31,9 +31,6 @@ class Jogador
             #Instanciando Arma do Jogador
             @espada = Item.new(@space)
 
-            #Limites do mapa para o jogador
-            @limites_mapa_jogador = 800
-
             #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
 
@@ -49,7 +46,13 @@ class Jogador
 
       #Movimentação para esquerda
       def left
-            @body.apply_impulse(CP::Vec2.new(-4.0, 0), CP::Vec2.new(0, 0))
+            #Verifica se o personagem ainda pode anda para esquerda, ou seja se ele chegou
+            #no limite esquerdo do mapa
+            if @body.p.x > 0
+                  @body.apply_impulse(CP::Vec2.new(-4.0, 0), CP::Vec2.new(0, 0))
+            else
+                  @body.p.x = 0
+            end
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = true
@@ -57,7 +60,13 @@ class Jogador
 
       #Movimentação para Direita
       def right
-            @body.apply_impulse(CP::Vec2.new(4.0, 0), CP::Vec2.new(0, 0))
+            #Verifica se o personagem ainda pode anda para direita, ou seja se ele chegou
+            #no limite direito do mapa
+            if @body.p.x < 770
+                  @body.apply_impulse(CP::Vec2.new(4.0, 0), CP::Vec2.new(0, 0))
+            else
+                  @body.p.x = 770
+            end
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = false
@@ -97,8 +106,10 @@ class Jogador
             #escolhe qual para que lado a cabeça estará virada
             if @QualLado
                   @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
+                  @espada.posicaoEspada(-120,@movimentacao)
             else
                   @r_cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
+                  @espada.posicaoEspada(0,@movimentacao)
             end
 
             ##################Desenha o tronco#######################
@@ -112,7 +123,7 @@ class Jogador
                                 0.5,0)
 
             @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
-                                 2,-@movimentacao,
+                                 3,-@movimentacao,
                                  0.5,0)
             #########################################################
 

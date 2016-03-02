@@ -54,6 +54,7 @@ class GameWindow < Gosu::Window
                   #Importante para da andamento nos elementos da fisica no space
                   @physical.space.step(@physical.dt)
             end
+
             moverJogadorRelacaoMapa()
 
             #Muito Importante!! Sem isso as particulas definidas como estaticas não se mexem no mapa.
@@ -64,19 +65,22 @@ class GameWindow < Gosu::Window
       end
 
       #Usado para fazer o mapa e o jogador se moverem de forma relativa
+      #!!!Devido aos movimentos do jogador e mapa serem diferentes. Quando o mapa estiver
+      #   se movendo, devemos decrementar a velocidade para evitar que o personagem ande
+      #   junto com o mapa.
       def moverJogadorRelacaoMapa
-
+            puts "#{@world.limites_mapa}___#{@jogador.body.p.x}"
             #Verifica se esta indo para esquerda. Sempre em relação ao personagem
-            if @jogador.limites_mapa_jogador - @jogador.body.p.x > WIDTH-300
-                  #condição importante. Evita que volte ao chegar na ponta do mapa
-                  if @world.limites_mapa <= WIDTH
+            if WIDTH - @jogador.body.p.x > WIDTH-300
+                  #condição importante. Evita que o personagem volte ao chegar na ponta do mapa
+                  if @world.limites_mapa < WIDTH
                         @jogador.body.p.x += SPEED_MAP
                   end
                   @world.map_left(SPEED_MAP)
 
             #Verifica se esta indo para direita. Sempre em relação ao personagem
-            elsif @jogador.limites_mapa_jogador - @jogador.body.p.x <= 300
-                  #condição importante. Evita que volte ao chegar na ponta do mapa
+            elsif WIDTH - @jogador.body.p.x <= 300
+                  #condição importante. Evita que o personagem volte ao chegar na ponta do mapa
                   if @world.limites_mapa > 0
                         @jogador.body.p.x -= SPEED_MAP
                   end
