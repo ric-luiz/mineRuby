@@ -11,9 +11,6 @@ class Jogador
 
             #Angulo da movimetação dos braços
             @movimentacao = 0.0
-            #Sobrescrita dos braços
-            @sobre1 = 1
-            @sobre2 = 2
 
             #Detalhe: 2 braços
             @bracoLeft = @tiled.frame(6)
@@ -25,11 +22,11 @@ class Jogador
 
             #Definindo Varivaeis space, window e world
             @space = space
-            # @window = win
+            @window = win
             # @world = world
 
             #Instanciando Arma do Jogador
-            @espada = Item.new(@space)
+            @espada = Item.new(@space,:espada,@window)
 
             #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
@@ -96,13 +93,6 @@ class Jogador
             # puts "#{Math.cos(@movimentacao.gosu_to_radians)*@bracoLeft.height}---#{Math.sin(-@movimentacao.gosu_to_radians)*@bracoLeft.height}___#{@movimentacao}"
             # @cabeca.draw(@pontaMaoX,@pontaMaoY,10,0.5,0.5)
 
-            # # Esse trecho de codigo é usado para depuração das shapes no jogador
-            # @window.draw_quad(@body.p.x + @shape_verts[3].x, @body.p.y + @shape_verts[3].y, @color,
-            #              @body.p.x + @shape_verts[2].x, @body.p.y + @shape_verts[2].y, @color,
-            #              @body.p.x + @shape_verts[0].x, @body.p.y + @shape_verts[0].y, @color,
-            #              @body.p.x + @shape_verts[1].x, @body.p.y + @shape_verts[1].y, @color,
-            #              z=3)
-
             #escolhe qual para que lado a cabeça estará virada
             if @QualLado
                   @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
@@ -112,33 +102,23 @@ class Jogador
                   @espada.posicaoEspada(0,@movimentacao)
             end
 
-            ##################Desenha o tronco#######################
-            @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,
-                             2,0,
-                             0,0)
+            ###########################Desenha o tronco###################################
+            @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,2,0,0,0)                    #
 
-            ##################Desenha os braços######################
-            @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,
-                                1,@movimentacao,
-                                0.5,0)
+            ###########################Desenha os braços##################################
+            @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,1,@movimentacao,0.5,0)     #
+                                                                                         #
+            @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,3,-@movimentacao,0.5,0)   #
+            ##############################################################################
 
-            @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,
-                                 3,-@movimentacao,
-                                 0.5,0)
-            #########################################################
+            ###########################Desenha a espada do personagem#####################
+            @espada.draw(@pontaMaoX,@pontaMaoY)                                          #
 
-            ############Desenha a espada do personagem###############
-            @espada.draw(@pontaMaoX,@pontaMaoY)
-
-            ##################Desenha as Pernas######################
-            @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,
-                                1,@movimentacao,
-                                0.5,0)
-
-            @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,
-                                 1,-@movimentacao,
-                                 0.5,0)
-            #########################################################
+            ###########################Desenha as Pernas##################################
+            @pernaLeft.draw_rot(@posicaoPernaX,@posicaoPernaY,1,@movimentacao,0.5,0)     #
+                                                                                         #
+            @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,1,-@movimentacao,0.5,0)   #
+            ##############################################################################
       end
 
       #Fazendo os membro se mexerem
@@ -161,13 +141,8 @@ class Jogador
             @shape.e = ELASTICITY
 
             @space.add_body(@body)
-            @space.add_shape(shape)
+            @space.add_shape(@shape)
 
-            # #Usado para depuração das shapes no jogo
-            # @color = Gosu::Color.new(255,0,255,0)
-            # # the more elastic the greener
-            # @color.saturation *= ELASTICITY
-            # @color.value *= ELASTICITY
       end
 
       #Define em quais posições vão ficar os membros do personagem

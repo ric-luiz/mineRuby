@@ -2,6 +2,7 @@ require 'gosu'
 require 'json'
 require 'chipmunk'
 require_relative 'jogador.rb'
+require_relative 'zumbi.rb'
 require_relative 'tileset.rb'
 require_relative 'particula.rb'
 require_relative 'world.rb'
@@ -39,6 +40,9 @@ class GameWindow < Gosu::Window
 
             #Instanciando o Jogador
             @jogador = Jogador.new(@physical.space,self,@world)
+
+            #Instanciando o Zumbi
+            @zumbi = Zumbi.new(@physical.space)
       end
 
       def button_down(id)
@@ -58,7 +62,7 @@ class GameWindow < Gosu::Window
             moverJogadorRelacaoMapa()
 
             #Muito Importante!! Sem isso as particulas definidas como estaticas não se mexem no mapa.
-            #Isso evita que elas se movam junto com o personagem
+            #Isso evita que elas fiquem paradas e se movam junto com o personagem
             @physical.space.rehash_static()
 
             self.caption = "#{Gosu.fps} FPS."
@@ -69,7 +73,6 @@ class GameWindow < Gosu::Window
       #   se movendo, devemos decrementar a velocidade para evitar que o personagem ande
       #   junto com o mapa.
       def moverJogadorRelacaoMapa
-            puts "#{@world.limites_mapa}___#{@jogador.body.p.x}"
             #Verifica se esta indo para esquerda. Sempre em relação ao personagem
             if WIDTH - @jogador.body.p.x > WIDTH-300
                   #condição importante. Evita que o personagem volte ao chegar na ponta do mapa
@@ -91,6 +94,7 @@ class GameWindow < Gosu::Window
       def draw
             @world.draw
             @jogador.draw
+            @zumbi.draw
       end
 
 end

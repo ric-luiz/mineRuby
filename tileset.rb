@@ -1,6 +1,6 @@
 #Seletor de frames para os personagens
 class Tileset
-      #Recupera os Dados do map.json e cria uma imagem com o nome contido nele
+      #Recupera os Dados do map.json(ou qualquer outro json) e cria uma imagem com o nome contido nele
       def initialize(json)
             @json = JSON.parse(File.read(json))
             @main_image = Gosu::Image.new(@json['meta']['image'])

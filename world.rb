@@ -2,7 +2,6 @@
 class World
       attr_reader :limites_mapa
       def initialize(window,space)
-
             #Definindo incrementador de linhas e colunas
             @r=0
             @c=0
