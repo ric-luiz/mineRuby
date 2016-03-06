@@ -42,7 +42,7 @@ class GameWindow < Gosu::Window
             @jogador = Jogador.new(@physical.space,self,@world)
 
             #Instanciando o Zumbi
-            @zumbi = Zumbi.new(@physical.space)
+            @zumbi = Zumbi.new(@physical.space,self)
       end
 
       def button_down(id)
@@ -59,6 +59,7 @@ class GameWindow < Gosu::Window
                         @jogador.stand()
                   end
                   @jogador.jump() if button_down?(Gosu::KbSpace)
+                  @jogador.atacar() if button_down?(Gosu::KbS)
 
                   @zumbi.perseguir(@jogador.body.p.x,@jogador.body.p.y)
 

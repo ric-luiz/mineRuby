@@ -1,4 +1,5 @@
 class Item
+      attr_accessor :ataque
       def initialize(space,tipo,window)
             @tiled = Tileset.new('assets/item.json')
             @espada = @tiled.frame(0)
@@ -21,40 +22,62 @@ class Item
             #Evita colisões com o jogador
             @space.add_collision_func(:jogador, @tipo, &nil)
 
+            # Detectando colisões. Esta sendo usada para Golpes nos inimigos
+            @space.add_collision_func(@tipo, :zumbi) do |item, zumbi|
+                  @atacou = 'atacou'
+            end
+
             # #Usado para depuração de shapes do chipmunk
-            # @window = window
+            @window = window
       end
 
       def draw(x,y)
+            puts @atacou
             @body.p.x = x
             @body.p.y = y
 
             @espada.draw_rot(@body.p.x,@body.p.y,2,@body.a,0.2,0.8)
 
-            # # Esse trecho de codigo é usado para depuração das shapes no jogador
+            # Esse trecho de codigo é usado para depuração das shapes no jogador
             # @window.draw_quad(@body.p.x + @shape.vert(3).x, @body.p.y + @shape.vert(3).y, @color,
             #              @body.p.x + @shape.vert(2).x, @body.p.y + @shape.vert(2).y, @color,
             #              @body.p.x + @shape.vert(0).x, @body.p.y + @shape.vert(0).y, @color,
             #              @body.p.x + @shape.vert(1).x, @body.p.y + @shape.vert(1).y, @color,
             #              z=3)
+            @atacou = ''
       end
 
       #Este Metodo define a posição da espada na mão do personagem. Pode ser para a Esquerda ou Direita
       def posicaoEspada(direcao,angulo)
             @paraQualLado = direcao
             @body.a = -angulo + @paraQualLado
+
+            #Vamos remontar as formas a partir do lado para o qual o corpo esta direcionado
+            if direcao < 0
+                  @shape.set_verts!(@forma2,CP::Vec2.new(0, 0))
+                  @space.add_shape(@shape)
+            else
+                  @shape.set_verts!(@forma,CP::Vec2.new(0, 0))
+                  @space.add_shape(@shape)
+            end
       end
 
       def definirCorpo()
             @body = CP::Body.new_static()
-
+            @body.a = 0.0
             @body.p = CP::Vec2.new(0, 0)
-            @forma = [CP::Vec2.new(0.0, -10.0), CP::Vec2.new(0.0, 5.0),
-                     CP::Vec2.new(30.0, -20.0), CP::Vec2.new(30.0, -35.0)]
+
+            #Infelizemente as forma não acompanham o angulo do corpo. Por isso coloco 2 formas.
+            #Uma para o lado esquerdo e outra para o direito
+            #lado esquerdo
+            @forma2 = [CP::Vec2.new(-30.0, -35.0), CP::Vec2.new(-30.0, -20.0),
+                      CP::Vec2.new(0.0, 5.0), CP::Vec2.new(0.0, -10.0)]
+            #Lado esquerdo
+            @forma = [CP::Vec2.new(30.0, -20.0), CP::Vec2.new(30.0, -35.0),
+                        CP::Vec2.new(0.0, -10.0), CP::Vec2.new(0.0, 5.0)]
+
             @shape = CP::Shape::Poly.new(@body, @forma, CP::Vec2.new(0,0))
             @shape.collision_type = @tipo
-            @shape.u = FRICTION
-            @shape.e = ELASTICITY
 
             @space.add_shape(@shape)
 

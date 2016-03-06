@@ -1,6 +1,6 @@
 class Zumbi
       attr_accessor :body
-      def initialize(space)
+      def initialize(space,win)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
 
@@ -8,9 +8,6 @@ class Zumbi
             @cabeca = @tiled.frame(18)
             @r_cabeca = @tiled.frame(19)
             @tronco = @tiled.frame(17)
-
-            #Angulo da movimetação dos braços
-            @movimentacao = 0.0
 
             #Detalhe: 2 braços
             @bracoLeft = @tiled.frame(16)
@@ -22,7 +19,7 @@ class Zumbi
 
             #Definindo Varivaeis space, window
             @space = space
-            # @window = win
+            @window = win
 
             #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
@@ -101,6 +98,14 @@ class Zumbi
                                                                                          #
             @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,1,-@movimentacao,0.5,0)   #
             ##############################################################################
+
+
+            # Esse trecho de codigo é usado para depuração das shapes no jogador
+            # @window.draw_quad(@body.p.x + @shape.vert(3).x, @body.p.y + @shape.vert(3).y, @color,
+            #              @body.p.x + @shape.vert(2).x, @body.p.y + @shape.vert(2).y, @color,
+            #              @body.p.x + @shape.vert(0).x, @body.p.y + @shape.vert(0).y, @color,
+            #              @body.p.x + @shape.vert(1).x, @body.p.y + @shape.vert(1).y, @color,
+            #              z=3)
       end
 
       #Fazendo os membro se mexerem
@@ -145,8 +150,12 @@ class Zumbi
             @space.add_body(@body)
             @space.add_shape(@shape)
 
+            # #Usado para depuração das shapes no jogo
+            # @color = Gosu::Color.new(255,0,255,0)
+            # # the more elastic the greener
+            # @color.saturation *= ELASTICITY
+            # @color.value *= ELASTICITY
+
       end
-
-
 
 end

@@ -11,6 +11,7 @@ class Jogador
 
             #Angulo da movimetação dos braços
             @movimentacao = 0.0
+            @movAtaque = 0
 
             #Define para que lado a cabeça do personagem vai virar
             @lado_movimentacao = 1
@@ -30,6 +31,9 @@ class Jogador
 
             #Instanciando Arma do Jogador
             @espada = Item.new(@space,:espada,@window)
+
+            #ataque com a espada
+            @ataque = [0,0]
 
             #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
@@ -89,12 +93,24 @@ class Jogador
             @podePular = false
       end
 
+      def atacar
+            if @QualLado
+                  @movAtaque = 100
+            else
+                  @movAtaque = -100
+            end
+      end
+
       def draw
             #Fazer os membros balançarem para ambos os lados
             if @movimentacao >= 60
                   @lado_movimentacao = -1
             elsif @movimentacao <= -60
                   @lado_movimentacao = 1
+            end
+
+            if @movAtaque != 0
+                  movimentoAtaque
             end
 
             #Define a posição dos elementos do corpo do personagem
@@ -107,10 +123,10 @@ class Jogador
             #escolhe qual para que lado a cabeça estará virada
             if @QualLado
                   @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
-                  @espada.posicaoEspada(-120,@movimentacao)
+                  @espada.posicaoEspada(-100,@movimentacao+@movAtaque/2)
             else
                   @r_cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
-                  @espada.posicaoEspada(0,@movimentacao)
+                  @espada.posicaoEspada(0,@movimentacao+@movAtaque/2)
             end
 
             ###########################Desenha o tronco###################################
@@ -119,7 +135,7 @@ class Jogador
             ###########################Desenha os braços##################################
             @bracoLeft.draw_rot(@posicaoBracoX,@posicaoBracoY,1,@movimentacao,0.5,0)     #
                                                                                          #
-            @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,3,-@movimentacao,0.5,0)   #
+            @bracoRight.draw_rot(@posicaoBracoX,@posicaoBracoY,3,-@movimentacao+@movAtaque,0.5,0)   #
             ##############################################################################
 
             ###########################Desenha a espada do personagem#####################
@@ -135,6 +151,14 @@ class Jogador
       #Fazendo os membro se mexerem
       def movimentacaoMembros
             @movimentacao += @lado_movimentacao
+      end
+
+      def movimentoAtaque
+            if @movAtaque > 0
+                  @movAtaque -= 10
+            else
+                  @movAtaque += 10
+            end
       end
 
       #Insere uma forma em volta do corpo do personagem para detectar colisoes e etc.
@@ -176,8 +200,8 @@ class Jogador
             @posicaoPernaY = @body.p.y + @tronco.height + @cabeca.height
 
             #Uso Conceitos da trigonometria para calular a ponta da mao através do angulo
-            @pontaMaoY = @body.p.y + @tronco.height + Math.sin(-@movimentacao.gosu_to_radians)*@bracoLeft.height
-            @pontaMaoX = @body.p.x + @tronco.width + Math.cos(@movimentacao.gosu_to_radians)*@bracoLeft.height
+            @pontaMaoY = @body.p.y + @tronco.height + Math.sin(-(@movimentacao-@movAtaque).gosu_to_radians)*@bracoLeft.height
+            @pontaMaoX = @body.p.x + @tronco.width + Math.cos((@movimentacao-@movAtaque).gosu_to_radians)*@bracoLeft.height
       end
 
 end
