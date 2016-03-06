@@ -3,6 +3,7 @@ require 'json'
 require 'chipmunk'
 require_relative 'jogador.rb'
 require_relative 'zumbi.rb'
+require_relative 'esqueleto.rb'
 require_relative 'tileset.rb'
 require_relative 'particula.rb'
 require_relative 'world.rb'
@@ -43,6 +44,7 @@ class GameWindow < Gosu::Window
 
             #Instanciando o Zumbi
             @zumbi = Zumbi.new(@physical.space,self)
+            @esqueleto = Esqueleto.new(@physical.space)
       end
 
       def button_down(id)
@@ -62,9 +64,11 @@ class GameWindow < Gosu::Window
                   @jogador.atacar() if button_down?(Gosu::KbS)
 
                   @zumbi.perseguir(@jogador.body.p.x,@jogador.body.p.y)
-
+                  @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
                   #Importante para da andamento nos elementos da fisica no space
                   @physical.space.step(@physical.dt)
+
+                #  @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
             end
 
             moverJogadorRelacaoMapa
@@ -116,6 +120,7 @@ class GameWindow < Gosu::Window
             @world.draw
             @jogador.draw
             @zumbi.draw
+            @esqueleto.draw
       end
 
 end

@@ -1,1 +1,2 @@
 # mineRuby
+A ruby game.
