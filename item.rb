@@ -28,7 +28,8 @@ class Item
       def draw(x,y)
             @body.p.x = x
             @body.p.y = y
-            @espada.draw_rot(@body.p.x,@body.p.y,2,@angulo,0.2,0.8)
+
+            @espada.draw_rot(@body.p.x,@body.p.y,2,@body.a,0.2,0.8)
 
             # # Esse trecho de codigo é usado para depuração das shapes no jogador
             # @window.draw_quad(@body.p.x + @shape.vert(3).x, @body.p.y + @shape.vert(3).y, @color,
@@ -41,7 +42,7 @@ class Item
       #Este Metodo define a posição da espada na mão do personagem. Pode ser para a Esquerda ou Direita
       def posicaoEspada(direcao,angulo)
             @paraQualLado = direcao
-            @angulo = -angulo + @paraQualLado
+            @body.a = -angulo + @paraQualLado
       end
 
       def definirCorpo()

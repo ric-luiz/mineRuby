@@ -1,4 +1,5 @@
 class Zumbi
+      attr_accessor :body
       def initialize(space)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -25,14 +26,66 @@ class Zumbi
 
             #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
+
+            #Angulo da movimetação dos braços
+            @movimentacao = 0.0
+
+            #Define para que lado a cabeça do personagem vai virar
+            @lado_movimentacao = 1
+      end
+
+      def right
+            @body.p.x +=0.2
+            movimentacaoMembros()
+            #Lado para qual o personagem deve virar o rosto
+            @QualLado = false
+      end
+
+      def left
+            @body.p.x -=0.2
+            movimentacaoMembros()
+            #Lado para qual o personagem deve virar o rosto
+            @QualLado = true
+      end
+
+      def stand
+            @movimentacao = 0.0
+      end
+
+      def jump
+
+      end
+
+      def perseguir(jogX,jogY)
+            if Gosu.distance(@body.p.x,@body.p.y,jogX,jogY) <= 300
+                  if @body.p.x < jogX
+                        right()
+                  else
+                        left()
+                  end
+            else
+                  stand()
+            end
       end
 
       def draw
 
+            #Fazer os membros balançarem para ambos os lados
+            if @movimentacao >= 60
+                  @lado_movimentacao = -1
+            elsif @movimentacao <= -60
+                  @lado_movimentacao = 1
+            end
+
             #Define a posição dos elementos do corpo do personagem
             definirPosicao()
 
-            @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
+            #escolhe qual para que lado a cabeça estará virada
+            if @QualLado
+                  @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
+            else
+                  @r_cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
+            end
 
             ###########################Desenha o tronco###################################
             @tronco.draw_rot(@posicaoTroncoX,@posicaoTroncoY,2,0,0,0)                    #
@@ -50,8 +103,9 @@ class Zumbi
             ##############################################################################
       end
 
-      def right
-            @body.apply_impulse(CP::Vec2.new(4.0, 0), CP::Vec2.new(0, 0))
+      #Fazendo os membro se mexerem
+      def movimentacaoMembros
+            @movimentacao += @lado_movimentacao
       end
 
       #Define em quais posições vão ficar os membros do personagem
@@ -92,5 +146,7 @@ class Zumbi
             @space.add_shape(@shape)
 
       end
+
+
 
 end

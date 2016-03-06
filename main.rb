@@ -51,15 +51,23 @@ class GameWindow < Gosu::Window
 
       def update
             6.times do
-                  @jogador.left() if button_down?(Gosu::KbLeft)
-                  @jogador.right() if button_down?(Gosu::KbRight)
+                  if button_down?(Gosu::KbLeft)
+                        @jogador.left()
+                  elsif button_down?(Gosu::KbRight)
+                        @jogador.right()
+                  else
+                        @jogador.stand()
+                  end
                   @jogador.jump() if button_down?(Gosu::KbSpace)
+
+                  @zumbi.perseguir(@jogador.body.p.x,@jogador.body.p.y)
 
                   #Importante para da andamento nos elementos da fisica no space
                   @physical.space.step(@physical.dt)
             end
 
-            moverJogadorRelacaoMapa()
+            moverJogadorRelacaoMapa
+            manterObejtosRelacaoMapa
 
             #Muito Importante!! Sem isso as particulas definidas como estaticas não se mexem no mapa.
             #Isso evita que elas fiquem paradas e se movam junto com o personagem
@@ -88,6 +96,18 @@ class GameWindow < Gosu::Window
                         @jogador.body.p.x -= SPEED_MAP
                   end
                   @world.map_right(-SPEED_MAP)
+            end
+      end
+
+      #Esse metodo é bem parecido com o do Mover mapa em relação ao jogador. Mas esse serve para os objetos
+      #que não são controlaveis no mapa (como os inimigos). Ele evita que, ao mapa se mover, os objetos andem.
+      #junto com o mapa.
+      def manterObejtosRelacaoMapa
+            #Para verificar para qual lado o mapa esta indo, usamos os atributos de direção da classe World
+            if @world.movendoMapaLeft
+                  @zumbi.body.p.x += SPEED_MAP
+            elsif @world.movendoMapaRigth
+                  @zumbi.body.p.x -= SPEED_MAP
             end
       end
 

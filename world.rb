@@ -1,6 +1,6 @@
 #A classe world é responsavel por manipular os elementos do background do jogo
 class World
-      attr_reader :limites_mapa
+      attr_reader :limites_mapa,:movendoMapaLeft,:movendoMapaRigth
       def initialize(window,space)
             #Definindo incrementador de linhas e colunas
             @r=0
@@ -72,7 +72,7 @@ class World
 
                   l+=1
             end
-            #setamos para false para que as particulas não continuem se mexendo a
+            #setamos para false para que as particulas não continuem se mexendo caso a
             #movimentação nao estaja sendo efetuada
             @movendoMapaRigth = false
             @movendoMapaLeft = false

@@ -12,6 +12,9 @@ class Jogador
             #Angulo da movimetação dos braços
             @movimentacao = 0.0
 
+            #Define para que lado a cabeça do personagem vai virar
+            @lado_movimentacao = 1
+
             #Detalhe: 2 braços
             @bracoLeft = @tiled.frame(6)
             @bracoRight = @bracoLeft
@@ -36,9 +39,6 @@ class Jogador
                @par = par
                @podePular = true
             end
-
-            #Define para que lado a cabeça do personagem vai virar
-            @lado_movimentacao = 1
       end
 
       #Movimentação para esquerda
@@ -67,6 +67,17 @@ class Jogador
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = false
+      end
+
+      #Ficar na Posição Parada
+      def stand
+            if @movimentacao != 0.0
+                  if @movimentacao < 0
+                        @movimentacao += 1
+                  else
+                        @movimentacao -= 1
+                  end
+            end
       end
 
       #Ação de pulo do personagem
@@ -130,7 +141,7 @@ class Jogador
       def definirCorpo
             @body = CP::Body.new(10.0,1.0/0)
 
-            @body.p = CP::Vec2.new(500, 100)
+            @body.p = CP::Vec2.new(800, 100)
 
             @shape_verts = [CP::Vec2.new(0.0, 0.0), CP::Vec2.new(0.0, 70),
                             CP::Vec2.new(25, 70), CP::Vec2.new(25, 0.0)]
