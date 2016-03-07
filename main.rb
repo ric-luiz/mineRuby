@@ -111,8 +111,10 @@ class GameWindow < Gosu::Window
             #Para verificar para qual lado o mapa esta indo, usamos os atributos de direção da classe World
             if @world.movendoMapaLeft
                   @zumbi.body.p.x += SPEED_MAP
+                  @esqueleto.body.p.x += SPEED_MAP
             elsif @world.movendoMapaRigth
                   @zumbi.body.p.x -= SPEED_MAP
+                  @esqueleto.body.p.x -= SPEED_MAP
             end
       end
 
