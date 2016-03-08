@@ -20,7 +20,6 @@ TOTAL_WIDTH_TILE = MAP_WORLD['width'] * MAP_WORLD['tilewidth']
 SPEED_MAP = 2
 ###################################################################
 
-
 ##################Propriedaes da Fisica(PhysicalWorld)#############
 GRAVITY = 25.0
 DAMPING = 0.8
