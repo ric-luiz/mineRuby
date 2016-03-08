@@ -48,6 +48,7 @@ class GameWindow < Gosu::Window
             @jogando = false
             @font = Gosu::Font.new(45)
             @fontmine = Gosu::Font.new(125)
+            @fontpainel = Gosu::Font.new(40)
 
       end
 
@@ -136,6 +137,10 @@ class GameWindow < Gosu::Window
               @jogador.draw
               @zumbi.draw
               @esqueleto.draw
+              @fontpainel.draw("Vida: ", 10, 10, 2)
+          elsif @vida_personagem == 0
+            @fontmine.draw("Game Over", 180, 150, 2)
+            @jogando = false
           else
               @telainicial = Gosu::Image.new('assets/telainicial.png')
               @telainicial.draw(0,0,1)
