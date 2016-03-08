@@ -46,6 +46,10 @@ class GameWindow < Gosu::Window
             @zumbi = Zumbi.new(@physical.space,self)
             @esqueleto = Esqueleto.new(@physical.space)
 
+            @jogando = false
+            @font = Gosu::Font.new(45)
+            @fontmine = Gosu::Font.new(125)
+
       end
 
       def button_down(id)
@@ -125,10 +129,18 @@ class GameWindow < Gosu::Window
       end
 
       def draw
-            @world.draw
-            @jogador.draw
-            @zumbi.draw
-            @esqueleto.draw
+          if @jogando
+              @world.draw
+              @jogador.draw
+              @zumbi.draw
+              @esqueleto.draw
+          else
+              @telainicial = Gosu::Image.new('assets/telainicial.png')
+              @telainicial.draw(0,0,1)
+              @font.draw("Aperte espa\u{E7}o para iniciar", 50, 50, 2)
+              @fontmine.draw("Mine", 180,150, 2)
+              @fontmine.draw("Ruby", 180,230, 2)
+          end
       end
 
 end
