@@ -32,7 +32,7 @@ ELASTICITY = 0.8
 class GameWindow < Gosu::Window
       def initialize
             super WIDTH, HEIGHT
-
+            puts self.methods
             #Recuperando propriedades fisicas do game
             @physical = PhysicalWorld.new
 
@@ -45,10 +45,15 @@ class GameWindow < Gosu::Window
             #Instanciando o Zumbi
             @zumbi = Zumbi.new(@physical.space,self)
             @esqueleto = Esqueleto.new(@physical.space)
+
       end
 
       def button_down(id)
             close if id == Gosu::KbEscape
+      end
+
+      def button_up(id)
+             @zumbi.podePerdeVida = true if id == Gosu::KbS
       end
 
       def update
@@ -64,6 +69,7 @@ class GameWindow < Gosu::Window
                   @jogador.atacar() if button_down?(Gosu::KbS)
 
                   @zumbi.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+
                   @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
                   #Importante para da andamento nos elementos da fisica no space
                   @physical.space.step(@physical.dt)
@@ -71,8 +77,8 @@ class GameWindow < Gosu::Window
                 #  @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
             end
 
-            moverJogadorRelacaoMapa
-            manterObejtosRelacaoMapa
+            moverJogadorRelacaoMapa()
+            manterObejtosRelacaoMapa()
 
             #Muito Importante!! Sem isso as particulas definidas como estaticas não se mexem no mapa.
             #Isso evita que elas fiquem paradas e se movam junto com o personagem

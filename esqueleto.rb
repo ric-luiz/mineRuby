@@ -147,6 +147,4 @@ class Esqueleto
 
       end
 
-
-
 end

@@ -1,5 +1,15 @@
+#Classe de manipulação de colisões para o zumbi
+class CollisionHandler
+  def initialize(zumbi)
+      @zumbi = zumbi
+  end
+  def begin(a, b, arbiter)
+      @zumbi.atacado = true
+  end
+end
+
 class Zumbi
-      attr_accessor :body
+      attr_accessor :body,:podePerdeVida,:atacado
       def initialize(space,win)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -29,8 +39,26 @@ class Zumbi
 
             #Define para que lado a cabeça do personagem vai virar
             @lado_movimentacao = 1
+
+            #Construindo o conjunto de Elementos para detectar a colisão entre a espada/zumbi
+            #Temos o atributo para saber se foi atacado, o objeto para manupular colisoes e
+            #o metodo para adicionar um maipulador de colisões para o chipmunk
+            @atacado = false
+            @collision = CollisionHandler.new(self)
+            @space.add_collision_handler(:espada, :zumbi,@collision)
+
+            #vidas do Personagem
+            @vida = 5
+            #pode perder vida?
+            @podePerdeVida = true
+
+            #vidas do Personagem
+            @vida = 3
+            #pode perder vida?
+            @podePerdeVida = true
       end
 
+      #Ir para direita
       def right
             @body.p.x +=0.2
             movimentacaoMembros()
@@ -38,6 +66,20 @@ class Zumbi
             @QualLado = false
       end
 
+      #Foi Atacado?
+      def atacado
+            if @atacado
+                  if @body.p.x < @posicaoXJogador
+                        @body.apply_impulse(CP::Vec2.new(-300.0, -200.0), CP::Vec2.new(0, 0))
+                  else
+                        @body.apply_impulse(CP::Vec2.new(300.0, -200.0), CP::Vec2.new(0, 0))
+                  end
+                  retirarVida
+            end
+            @atacado = false
+      end
+
+      #Ir para esquerda
       def left
             @body.p.x -=0.2
             movimentacaoMembros()
@@ -45,17 +87,25 @@ class Zumbi
             @QualLado = true
       end
 
+      #ficar parado
       def stand
             @movimentacao = 0.0
       end
 
-      def jump
-
+      #Retirar A vida do Zumbi
+      def retirarVida
+            if @podePerdeVida
+              @vida -= 1
+              @podePerdeVida = false
+            end
+            puts @vida
       end
 
+      #Persiga o jogador
       def perseguir(jogX,jogY)
             if Gosu.distance(@body.p.x,@body.p.y,jogX,jogY) <= 300
-                  if @body.p.x < jogX
+                  @posicaoXJogador = jogX
+                  if @body.p.x < @posicaoXJogador
                         right()
                   else
                         left()
@@ -66,6 +116,8 @@ class Zumbi
       end
 
       def draw
+
+            atacado
 
             #Fazer os membros balançarem para ambos os lados
             if @movimentacao >= 60

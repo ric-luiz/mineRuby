@@ -123,7 +123,7 @@ class Jogador
             #escolhe qual para que lado a cabeça estará virada
             if @QualLado
                   @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
-                  @espada.posicaoEspada(-100,@movimentacao+@movAtaque/2)
+                  @espada.posicaoEspada(-100,@movimentacao+@movAtaque/2-10)
             else
                   @r_cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
                   @espada.posicaoEspada(0,@movimentacao+@movAtaque/2)
