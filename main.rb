@@ -45,6 +45,10 @@ class GameWindow < Gosu::Window
             @zumbi = Zumbi.new(@physical.space,self)
             @esqueleto = Esqueleto.new(@physical.space)
 
+            #Retirar os inimigos do jogo
+            @inimigos = []
+
+            #Variaveis para a tela inicial do jogo
             @jogando = false
             @font = Gosu::Font.new(45)
             @fontmine = Gosu::Font.new(125)
