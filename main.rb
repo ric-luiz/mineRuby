@@ -53,6 +53,7 @@ class GameWindow < Gosu::Window
 
       def button_down(id)
             close if id == Gosu::KbEscape
+            @jogando=true if id == Gosu::KbSpace
       end
 
       def button_up(id)
@@ -60,34 +61,36 @@ class GameWindow < Gosu::Window
       end
 
       def update
-            6.times do
-                  if button_down?(Gosu::KbLeft)
-                        @jogador.left()
-                  elsif button_down?(Gosu::KbRight)
-                        @jogador.right()
-                  else
-                        @jogador.stand()
+            if @jogando
+                  6.times do
+                        if button_down?(Gosu::KbLeft)
+                              @jogador.left()
+                        elsif button_down?(Gosu::KbRight)
+                              @jogador.right()
+                        else
+                              @jogador.stand()
+                        end
+                        @jogador.jump() if button_down?(Gosu::KbSpace)
+                        @jogador.atacar() if button_down?(Gosu::KbS)
+
+                        @zumbi.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+
+                        @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+                        #Importante para da andamento nos elementos da fisica no space
+                        @physical.space.step(@physical.dt)
+
+                      #  @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
                   end
-                  @jogador.jump() if button_down?(Gosu::KbSpace)
-                  @jogador.atacar() if button_down?(Gosu::KbS)
 
-                  @zumbi.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+                  moverJogadorRelacaoMapa()
+                  manterObejtosRelacaoMapa()
 
-                  @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
-                  #Importante para da andamento nos elementos da fisica no space
-                  @physical.space.step(@physical.dt)
+                  #Muito Importante!! Sem isso as particulas definidas como estaticas não se mexem no mapa.
+                  #Isso evita que elas fiquem paradas e se movam junto com o personagem
+                  @physical.space.rehash_static()
 
-                #  @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+                  self.caption = "#{Gosu.fps} FPS."
             end
-
-            moverJogadorRelacaoMapa()
-            manterObejtosRelacaoMapa()
-
-            #Muito Importante!! Sem isso as particulas definidas como estaticas não se mexem no mapa.
-            #Isso evita que elas fiquem paradas e se movam junto com o personagem
-            @physical.space.rehash_static()
-
-            self.caption = "#{Gosu.fps} FPS."
       end
 
       #Usado para fazer o mapa e o jogador se moverem de forma relativa
