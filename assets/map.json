@@ -32,7 +32,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"assets/snove.png",
+         "image":"assets/nove.png",
          "imageheight":250,
          "imagewidth":950,
          "margin":0,

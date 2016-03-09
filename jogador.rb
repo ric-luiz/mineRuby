@@ -1,5 +1,5 @@
 class Jogador
-      attr_reader :body,:shape,:limites_mapa_jogador
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -38,11 +38,9 @@ class Jogador
             #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
 
-            #Detectando colisões. Esta sendo usada para os saltos
-            @space.add_collision_func(:jogador, :particula) do |jog, par|
-               @par = par
-               @podePular = true
-            end
+            @podePular = false
+            @particula = ''
+
       end
 
       #Movimentação para esquerda
@@ -86,13 +84,14 @@ class Jogador
 
       #Ação de pulo do personagem
       def jump
-            if @podePular and @body.p.y+60 < @par.body.p.y
+            if @podePular and @body.p.y+60 < @particula.body.p.y
                   @body.apply_impulse(CP::Vec2.new(0.0, -700.0), CP::Vec2.new(0, 0))
             end
             #Variavel para verificar se o personagem está no chão
             @podePular = false
       end
 
+      #Vamos atacar os inimigos com a nossa espada :)
       def atacar
             if @QualLado
                   @movAtaque = 100

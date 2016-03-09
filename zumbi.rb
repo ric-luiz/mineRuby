@@ -1,15 +1,5 @@
-#Classe de manipulação de colisões para o zumbi
-class CollisionHandler
-  def initialize(zumbi)
-      @zumbi = zumbi
-  end
-  def begin(a, b, arbiter)
-      @zumbi.atacado = true
-  end
-end
-
 class Zumbi
-      attr_accessor :body,:podePerdeVida,:atacado
+      attr_accessor :body,:shape,:podePerdeVida,:atacado,:vida
       def initialize(space,win)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -44,16 +34,9 @@ class Zumbi
             #Temos o atributo para saber se foi atacado, o objeto para manupular colisoes e
             #o metodo para adicionar um maipulador de colisões para o chipmunk
             @atacado = false
-            @collision = CollisionHandler.new(self)
-            @space.add_collision_handler(:espada, :zumbi,@collision)
 
             #vidas do Personagem
             @vida = 5
-            #pode perder vida?
-            @podePerdeVida = true
-
-            #vidas do Personagem
-            @vida = 3
             #pode perder vida?
             @podePerdeVida = true
       end
@@ -70,9 +53,9 @@ class Zumbi
       def atacado
             if @atacado
                   if @body.p.x < @posicaoXJogador
-                        @body.apply_impulse(CP::Vec2.new(-300.0, -200.0), CP::Vec2.new(0, 0))
+                        @body.apply_impulse(CP::Vec2.new(-500.0, -200.0), CP::Vec2.new(0, 0))
                   else
-                        @body.apply_impulse(CP::Vec2.new(300.0, -200.0), CP::Vec2.new(0, 0))
+                        @body.apply_impulse(CP::Vec2.new(500.0, -200.0), CP::Vec2.new(0, 0))
                   end
                   retirarVida
             end
@@ -97,8 +80,7 @@ class Zumbi
             if @podePerdeVida
               @vida -= 1
               @podePerdeVida = false
-            end
-            puts @vida
+            end            
       end
 
       #Persiga o jogador
@@ -117,7 +99,7 @@ class Zumbi
 
       def draw
 
-            atacado
+            atacado()
 
             #Fazer os membros balançarem para ambos os lados
             if @movimentacao >= 60
@@ -198,6 +180,8 @@ class Zumbi
 
             @shape.u = FRICTION
             @shape.e = ELASTICITY
+            #Passa para dentro do chipmunk o objeto zumbi
+            @shape.object = self
 
             @space.add_body(@body)
             @space.add_shape(@shape)

@@ -9,6 +9,7 @@ require_relative 'particula.rb'
 require_relative 'world.rb'
 require_relative 'physicalWorld.rb'
 require_relative 'item.rb'
+require_relative 'collisionHandlerZumbi.rb'
 
 ##################Propriedades do Cenario(World)###################
 WIDTH = 800
@@ -17,6 +18,7 @@ MAP_WORLD = JSON.parse(File.read('assets/map.json'))
 TILE_WIDTH = MAP_WORLD['tilewidth']
 TILE_HEIGTH = MAP_WORLD['tileheight']
 TOTAL_WIDTH_TILE = MAP_WORLD['width'] * MAP_WORLD['tilewidth']
+TOTAL_HEIGHT_TILE = MAP_WORLD['height'] * MAP_WORLD['tileheight']
 SPEED_MAP = 2
 ###################################################################
 
@@ -31,7 +33,7 @@ ELASTICITY = 0.8
 class GameWindow < Gosu::Window
       def initialize
             super WIDTH, HEIGHT
-            puts self.methods
+
             #Recuperando propriedades fisicas do game
             @physical = PhysicalWorld.new
 
@@ -42,10 +44,10 @@ class GameWindow < Gosu::Window
             @jogador = Jogador.new(@physical.space,self,@world)
 
             #Instanciando o Zumbi
-            @zumbi = Zumbi.new(@physical.space,self)
-            @esqueleto = Esqueleto.new(@physical.space)
+            # @zumbi = Zumbi.new(@physical.space,self)
+            # @esqueleto = Esqueleto.new(@physical.space)
 
-            #Retirar os inimigos do jogo
+            #Retirar/manipular os inimigos do jogo
             @inimigos = []
 
             #Variaveis para a tela inicial do jogo
@@ -54,6 +56,12 @@ class GameWindow < Gosu::Window
             @fontmine = Gosu::Font.new(125)
             @fontpainel = Gosu::Font.new(40)
 
+            #Chamando todas as colisões entre os objetos do jogo
+            colisao()
+
+            #Classe para verificar o tempo que passou e para saber se pode colocar inimigo no mapa
+            @tempo = 1
+            @podeColocarInimigo = true
       end
 
       def button_down(id)
@@ -62,7 +70,9 @@ class GameWindow < Gosu::Window
       end
 
       def button_up(id)
-             @zumbi.podePerdeVida = true if id == Gosu::KbS
+             @inimigos.each do |inimigos|
+                inimigos.podePerdeVida = true if id == Gosu::KbS
+             end
       end
 
       def update
@@ -78,9 +88,23 @@ class GameWindow < Gosu::Window
                         @jogador.jump() if button_down?(Gosu::KbSpace)
                         @jogador.atacar() if button_down?(Gosu::KbS)
 
-                        @zumbi.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+                        #########bloco correspondente aos inimigos do jogo############
+                        #o bloco abaixo é responsável por fazer todos os inimigos perseguirem o jogador e caso a vida do inimigo chegue a zero ele é retirado do jogo
+                        iterador = 0
+                        @inimigos.each do |inimigos|
+                           inimigos.perseguir(@jogador.body.p.x,@jogador.body.p.y)
 
-                        @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+                           #Os inimigos são apagados caso a vida chegue a zero ou ele caia pelas bordas do mapa
+                           if inimigos.vida <= 0 or inimigos.body.p.y > TOTAL_HEIGHT_TILE
+                               @physical.space.remove_body(inimigos.body)
+                               @physical.space.remove_shape(inimigos.shape)
+                               @inimigos.delete_at(iterador)
+                           end
+                           iterador += 1
+                        end
+                        ##############################################################
+
+                        # @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
                         #Importante para da andamento nos elementos da fisica no space
                         @physical.space.step(@physical.dt)
 
@@ -95,6 +119,22 @@ class GameWindow < Gosu::Window
                   @physical.space.rehash_static()
 
                   self.caption = "#{Gosu.fps} FPS."
+
+                  #atualizando o tempo do jogo
+                  @tempo = Gosu::milliseconds()/1000
+
+                  #Adicionar Inimigos Automaticamente a cada 15 segundos
+                  if @tempo%15 == 0 and @inimigos.size < 3 and @podeColocarInimigo then
+                    zumbi = Zumbi.new(@physical.space,self)
+                    zumbi.body.p.x = rand(TOTAL_WIDTH_TILE)
+                    @inimigos.push(zumbi)
+                    @podeColocarInimigo = false
+                  end
+
+                  #Esse bloco de codigo garante que seja possivel colocar somente 1 inimigo a cada 15 segundos
+                  if @tempo%16 == 0
+                      @podeColocarInimigo = true
+                  end
             end
       end
 
@@ -127,11 +167,15 @@ class GameWindow < Gosu::Window
       def manterObejtosRelacaoMapa
             #Para verificar para qual lado o mapa esta indo, usamos os atributos de direção da classe World
             if @world.movendoMapaLeft
-                  @zumbi.body.p.x += SPEED_MAP
-                  @esqueleto.body.p.x += SPEED_MAP
+                  @inimigos.each do |inimigos|
+                     inimigos.body.p.x += SPEED_MAP
+                  end
+                  # @esqueleto.body.p.x += SPEED_MAP
             elsif @world.movendoMapaRigth
-                  @zumbi.body.p.x -= SPEED_MAP
-                  @esqueleto.body.p.x -= SPEED_MAP
+                  @inimigos.each do |inimigos|
+                     inimigos.body.p.x -= SPEED_MAP
+                  end
+                  # @esqueleto.body.p.x -= SPEED_MAP
             end
       end
 
@@ -139,8 +183,10 @@ class GameWindow < Gosu::Window
           if @jogando
               @world.draw
               @jogador.draw
-              @zumbi.draw
-              @esqueleto.draw
+              @inimigos.each do |inimigos|
+                 inimigos.draw
+              end
+              # @esqueleto.draw
               @fontpainel.draw("Vida: ", 10, 10, 2)
           elsif @vida_personagem == 0
             @fontmine.draw("Game Over", 180, 150, 2)
@@ -154,6 +200,17 @@ class GameWindow < Gosu::Window
           end
       end
 
+      def colisao
+          #Colisões para o zumbi
+          @collision = CollisionHandlerZumbi.new
+          @physical.space.add_collision_handler(:espada, :zumbi,@collision)
+
+          #Detectando colisões. Esta sendo usada para os saltos do jogador
+          @physical.space.add_collision_func(:jogador, :particula) do |jog, par|
+             @jogador.particula = par
+             @jogador.podePular = true
+          end
+      end
 end
 
 GameWindow.new.show
