@@ -62,6 +62,10 @@ class GameWindow < Gosu::Window
             #Classe para verificar o tempo que passou e para saber se pode colocar inimigo no mapa
             @tempo = 1
             @podeColocarInimigo = true
+
+            #musicas do background
+            @somBackground = Gosu::Sample.new("assets/sounds/minecraft2.wav")
+            @somBackground.play(1,1,true)
       end
 
       def button_down(id)
@@ -73,6 +77,7 @@ class GameWindow < Gosu::Window
              @inimigos.each do |inimigos|
                 inimigos.podePerdeVida = true if id == Gosu::KbS
              end
+             @jogador.podeSom = true
       end
 
       def update

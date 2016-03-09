@@ -1,5 +1,5 @@
 class Jogador
-      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -38,9 +38,14 @@ class Jogador
             #Vamos definir como será o corpo e a shape do personagem
             definirCorpo()
 
+            #Verifica se o jogador pode pular
             @podePular = false
             @particula = ''
 
+            #Sons do personagem
+            @somEspada = Gosu::Sample.new("assets/sounds/sword.flac")
+            @somVoz = Gosu::Sample.new("assets/sounds/human.wav")
+            @podeSom = true
       end
 
       #Movimentação para esquerda
@@ -86,6 +91,7 @@ class Jogador
       def jump
             if @podePular and @body.p.y+60 < @particula.body.p.y
                   @body.apply_impulse(CP::Vec2.new(0.0, -700.0), CP::Vec2.new(0, 0))
+                  @somVoz.play(0.5)
             end
             #Variavel para verificar se o personagem está no chão
             @podePular = false
@@ -93,6 +99,12 @@ class Jogador
 
       #Vamos atacar os inimigos com a nossa espada :)
       def atacar
+
+            if @podeSom
+                @somEspada.play(0.5)                
+                @podeSom = false
+            end
+
             if @QualLado
                   @movAtaque = 100
             else
