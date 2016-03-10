@@ -1,5 +1,5 @@
 class Jogador
-      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado,:espada,:qualLadoZumbi
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado,:espada,:qualLadoInimigo
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -122,7 +122,7 @@ class Jogador
           if @atacado
             @vida -= 1
             #pegamos qual lado o zumbi esta virado para empurrar o personagem
-            if @qualLadoZumbi
+            if @qualLadoInimigo
                   @body.apply_impulse(CP::Vec2.new(-500.0, -200.0), CP::Vec2.new(0, 0))
             else
                   @body.apply_impulse(CP::Vec2.new(500.0, 200.0), CP::Vec2.new(0, 0))

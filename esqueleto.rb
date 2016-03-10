@@ -1,6 +1,6 @@
 class Esqueleto
-      attr_accessor :body
-      def initialize(space)
+      attr_accessor :body,:shape,:podePerdeVida,:atacado,:vida,:qualLado
+      def initialize(space,win)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
 
@@ -31,18 +31,31 @@ class Esqueleto
             @movimentacao = 0.0
 
             #Define para que lado a cabeça do personagem vai virar
-            @lado_movimentacao = 1
+            @lado_movimentacao = 5
+
+            #Verifica se o zumbi foi atacado
+            @atacado = false
+
+            #vidas do Personagem
+            @vida = 5
+            #pode perder vida?
+            @podePerdeVida = true
+
+            #Sons do esqueleto
+            # @somZumbi = Gosu::Sample.new("assets/sounds/zombie.wav")
+            # @tempoSom = 0
+            # @podeEmitirSom = true
       end
 
       def right
-            @body.p.x +=0.2
+            @body.p.x += 2
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = false
       end
 
       def left
-            @body.p.x -=0.2
+            @body.p.x -= 2
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = true
@@ -52,16 +65,41 @@ class Esqueleto
             @movimentacao = 0.0
       end
 
+      #Foi Atacado?
+      def atacado
+            if @atacado
+                  if @body.p.x < @posicaoXJogador
+                        @body.apply_impulse(CP::Vec2.new(-500.0, -200.0), CP::Vec2.new(0, 0))
+                  else
+                        @body.apply_impulse(CP::Vec2.new(500.0, -200.0), CP::Vec2.new(0, 0))
+                  end
+
+                  retirarVida()
+            end
+            @atacado = false
+      end
+
+      #Retirar A vida do Zumbi
+      def retirarVida
+            if @podePerdeVida
+              @vida -= 1
+              @podePerdeVida = false
+            end
+      end
+
       def jump
 
       end
 
       def perseguir(jogX,jogY)
             if Gosu.distance(@body.p.x,@body.p.y,jogX,jogY) <= 300
-                  if @body.p.x < jogX
+                  @posicaoXJogador = jogX
+                  if @body.p.x+10 < @posicaoXJogador
                         right()
-                  else
+                  elsif @body.p.x-10 > @posicaoXJogador
                         left()
+                  else
+                        stand()
                   end
             else
                   stand()
@@ -69,12 +107,13 @@ class Esqueleto
       end
 
       def draw
+            atacado()
 
             #Fazer os membros balancarem para ambos os lados
             if @movimentacao >= 60
-                  @lado_movimentacao = -1
+                  @lado_movimentacao = -5
             elsif @movimentacao <= -60
-                  @lado_movimentacao = 1
+                  @lado_movimentacao = 5
             end
 
             #Define a posicao dos elementos do corpo do personagem
@@ -101,6 +140,20 @@ class Esqueleto
                                                                                          #
             @pernaRight.draw_rot(@posicaoPernaX,@posicaoPernaY,1,-@movimentacao,0.5,0)   #
             ##############################################################################
+      end
+
+      def sons
+          # @tempoSom = Gosu::milliseconds()/1000
+          # #Emite o som do zumbi Automaticamente a cada 10 segundos
+          # if @tempoSom%10 == 0 and @podeEmitirSom and @tempoSom != 0 then
+          #     @somZumbi.play(0.5)
+          #     @podeEmitirSom = false
+          # end
+          #
+          # #Esse bloco de codigo garante que seja possivel emitir o som a cada 10 segundos
+          # if @tempoSom%11 == 0
+          #     @podeEmitirSom = true
+          # end
       end
 
       #Fazendo os membro se mexerem
@@ -141,6 +194,8 @@ class Esqueleto
 
             @shape.u = FRICTION
             @shape.e = ELASTICITY
+            #Passa o objeto para dentro do chipmunk
+            @shape.object = self
 
             @space.add_body(@body)
             @space.add_shape(@shape)

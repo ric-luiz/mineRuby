@@ -30,9 +30,7 @@ class Zumbi
             #Define para que lado a cabeça do personagem vai virar
             @lado_movimentacao = 5
 
-            #Construindo o conjunto de Elementos para detectar a colisão entre a espada/zumbi
-            #Temos o atributo para saber se foi atacado, o objeto para manupular colisoes e
-            #o metodo para adicionar um maipulador de colisões para o chipmunk
+            #Verifica se o zumbi foi atacado
             @atacado = false
 
             #vidas do Personagem
@@ -92,11 +90,13 @@ class Zumbi
       #Persiga o jogador
       def perseguir(jogX,jogY)
             if Gosu.distance(@body.p.x,@body.p.y,jogX,jogY) <= 300
-                  @posicaoXJogador = jogX
-                  if @body.p.x < @posicaoXJogador
+                  @posicaoXJogador = jogX                
+                  if @body.p.x+10 < @posicaoXJogador
                         right()
-                  else
+                  elsif @body.p.x-10 > @posicaoXJogador
                         left()
+                  else
+                        stand()
                   end
             else
                   stand()
@@ -148,7 +148,7 @@ class Zumbi
             #              z=3)
       end
 
-      def somZumbis
+      def sons
           @tempoSom = Gosu::milliseconds()/1000
           #Emite o som do zumbi Automaticamente a cada 10 segundos
           if @tempoSom%10 == 0 and @podeEmitirSom and @tempoSom != 0 then

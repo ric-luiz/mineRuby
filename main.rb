@@ -9,7 +9,7 @@ require_relative 'particula.rb'
 require_relative 'world.rb'
 require_relative 'physicalWorld.rb'
 require_relative 'item.rb'
-require_relative 'collisionHandlerZumbi.rb'
+require_relative 'collisionHandlerInimigos.rb'
 require_relative 'collisionHandlerJogador.rb'
 
 ##################Propriedades do Cenario(World)###################
@@ -122,7 +122,7 @@ class GameWindow < Gosu::Window
                      iterador += 1
 
                      #Emitir sons do zumbi
-                     inimigos.somZumbis()
+                     inimigos.sons()
                   end
                   ##############################################################
 
@@ -141,9 +141,16 @@ class GameWindow < Gosu::Window
 
                   #Adicionar Inimigos Automaticamente a cada 15 segundos
                   if @tempo%15 == 0 and @inimigos.size < 3 and @podeColocarInimigo then
-                    zumbi = Zumbi.new(@physical.space,self)
-                    zumbi.body.p.x = rand(TOTAL_WIDTH_TILE)
-                    @inimigos.push(zumbi)
+                    #escolhe aleatoriamente entre os zumbis e esqueletos
+                    if rand(10) < 8
+                      zumbi = Zumbi.new(@physical.space,self)
+                      zumbi.body.p.x = rand(TOTAL_WIDTH_TILE)
+                      @inimigos.push(zumbi)
+                    else
+                      esqueleto = Esqueleto.new(@physical.space,self)
+                      esqueleto.body.p.x = rand(TOTAL_WIDTH_TILE)
+                      @inimigos.push(esqueleto)
+                    end
                     @podeColocarInimigo = false
                   end
 
@@ -223,17 +230,20 @@ class GameWindow < Gosu::Window
 
       def colisao
           #Colisões para o zumbi
-          @collision = CollisionHandlerZumbi.new
+          @collision = CollisionHandlerInimigos.new
           @physical.space.add_collision_handler(:espada, :zumbi,@collision)
+          @physical.space.add_collision_handler(:espada, :esqueleto,@collision)
 
           #Detectando colisões. Esta sendo usada para os saltos do jogador
           @physical.space.add_collision_func(:jogador, :particula) do |jog, par|
              @jogador.particula = par
              @jogador.podePular = true
           end
-          #se o jogador entrar em contato com um zumbi, perderá vida
+
+          #se o jogador entrar em contato com um zumbi/esqueleto, perderá vida
           @collision2 = CollisionHandlerJogador.new
           @physical.space.add_collision_handler(:jogador, :zumbi,@collision2)
+          @physical.space.add_collision_handler(:jogador, :esqueleto,@collision2)
 
       end
 end
