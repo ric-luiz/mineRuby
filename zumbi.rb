@@ -57,12 +57,13 @@ class Zumbi
       #Foi Atacado?
       def atacado
             if @atacado
-                  if @body.p.x < @posicaoXJogador
+                  if @QualLado
                         @body.apply_impulse(CP::Vec2.new(-500.0, -200.0), CP::Vec2.new(0, 0))
                   else
                         @body.apply_impulse(CP::Vec2.new(500.0, -200.0), CP::Vec2.new(0, 0))
                   end
-                  retirarVida
+                  
+                  retirarVida()
             end
             @atacado = false
       end

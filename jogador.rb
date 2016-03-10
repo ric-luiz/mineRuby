@@ -1,9 +1,5 @@
 class Jogador
-<<<<<<< HEAD
-      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom,:espada
-=======
-      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado
->>>>>>> f4c46446c79dd05094dd494c24eaae747f157873
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado,:espada
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -101,10 +97,7 @@ class Jogador
             @espada.atacando = true
             if @podeSom
                 @somEspada.play(0.5)
-<<<<<<< HEAD
                 @somVoz.play(0.5)
-=======
->>>>>>> f4c46446c79dd05094dd494c24eaae747f157873
                 @podeSom = false
             end
 
@@ -114,7 +107,6 @@ class Jogador
                   @movAtaque = -100
             end
       end
-<<<<<<< HEAD
 
       #Faz com que o jogador fique em uma posição valida no mapa
       def posicaoValida
@@ -125,7 +117,6 @@ class Jogador
           end
       end
 
-=======
       #em contato com monstro, afasta o jogador e diminui uma vida
       def podePerdeVida
           if @atacado
@@ -138,7 +129,7 @@ class Jogador
           end
           @atacado = false
       end
->>>>>>> f4c46446c79dd05094dd494c24eaae747f157873
+      
       def draw
 
             podePerdeVida()
