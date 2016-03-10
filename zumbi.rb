@@ -1,5 +1,5 @@
 class Zumbi
-      attr_accessor :body,:shape,:podePerdeVida,:atacado,:vida
+      attr_accessor :body,:shape,:podePerdeVida,:atacado,:vida,:qualLado
       def initialize(space,win)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -51,18 +51,18 @@ class Zumbi
             @body.p.x += 1
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
-            @QualLado = false
+            @qualLado = false
       end
 
       #Foi Atacado?
       def atacado
             if @atacado
-                  if @QualLado
+                  if @body.p.x < @posicaoXJogador
                         @body.apply_impulse(CP::Vec2.new(-500.0, -200.0), CP::Vec2.new(0, 0))
                   else
                         @body.apply_impulse(CP::Vec2.new(500.0, -200.0), CP::Vec2.new(0, 0))
                   end
-                  
+
                   retirarVida()
             end
             @atacado = false
@@ -73,7 +73,7 @@ class Zumbi
             @body.p.x -= 1
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
-            @QualLado = true
+            @qualLado = true
       end
 
       #ficar parado
@@ -118,7 +118,7 @@ class Zumbi
             definirPosicao()
 
             #escolhe qual para que lado a cabeça estará virada
-            if @QualLado
+            if @qualLado
                   @cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
             else
                   @r_cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)

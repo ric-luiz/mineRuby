@@ -52,6 +52,7 @@ class GameWindow < Gosu::Window
             @font = Gosu::Font.new(45)
             @fontmine = Gosu::Font.new(125)
             @fontpainel = Gosu::Font.new(40)
+            @score = 0
             @telainicial = Gosu::Image.new('assets/telainicial.png')
 
             #Chamando todas as colisões entre os objetos do jogo
@@ -116,6 +117,7 @@ class GameWindow < Gosu::Window
                          @physical.space.remove_body(inimigos.body)
                          @physical.space.remove_shape(inimigos.shape)
                          @inimigos.delete_at(iterador)
+                         @score += 10
                      end
                      iterador += 1
 
@@ -124,7 +126,7 @@ class GameWindow < Gosu::Window
                   end
                   ##############################################################
 
-
+                  #Evita que os elementos do mapa se movam junto com o movimento do mapa
                   moverJogadorRelacaoMapa()
                   manterObejtosRelacaoMapa()
 
@@ -184,12 +186,10 @@ class GameWindow < Gosu::Window
                   @inimigos.each do |inimigos|
                      inimigos.body.p.x += SPEED_MAP
                   end
-                  # @esqueleto.body.p.x += SPEED_MAP
             elsif @world.movendoMapaRigth
                   @inimigos.each do |inimigos|
                      inimigos.body.p.x -= SPEED_MAP
                   end
-                  # @esqueleto.body.p.x -= SPEED_MAP
             end
       end
 
@@ -200,8 +200,8 @@ class GameWindow < Gosu::Window
               @inimigos.each do |inimigos|
                  inimigos.draw
               end
-              @fontpainel.draw("Vida: ", 10, 10, 2)
-              @fontpainel.draw("Score: ", 10, 45, 2)
+              @fontpainel.draw("Vida: ", 10, 10, 2,1,1,Gosu::Color.argb(0xff_000000))
+              @fontpainel.draw("Score: #{@score}", 10, 45, 2,1,1,Gosu::Color.argb(0xff_000000))
               @vidac6.draw(100, 20, 2) if @jogador.vida == 6
               @vidac5.draw(100, 20, 2) if @jogador.vida == 5
               @vidac4.draw(100, 20, 2) if @jogador.vida == 4
@@ -215,9 +215,9 @@ class GameWindow < Gosu::Window
             @jogando = false
           else
               @telainicial.draw(0,0,1)
-              @font.draw("Aperte espa\u{E7}o para iniciar", 50, 50, 2)
-              @fontmine.draw("Mine", 180,150, 2)
-              @fontmine.draw("Ruby", 180,230, 2)
+              @font.draw("Aperte espa\u{E7}o para iniciar", 50, 50, 2,1,1,Gosu::Color.argb(0xff_000000))
+              @fontmine.draw("Mine", 180,150, 2,1,1,Gosu::Color.argb(0xff_000000))
+              @fontmine.draw("Ruby", 180,230, 2,1,1,Gosu::Color.argb(0xff_000000))
           end
       end
 
