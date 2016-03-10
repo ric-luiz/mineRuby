@@ -1,5 +1,9 @@
 class Jogador
+<<<<<<< HEAD
       attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom,:espada
+=======
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado
+>>>>>>> f4c46446c79dd05094dd494c24eaae747f157873
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -49,6 +53,10 @@ class Jogador
             @somVoz = Gosu::Sample.new("assets/sounds/human.wav")
             @somPulo = Gosu::Sample.new("assets/sounds/jump.wav")
             @podeSom = true
+            #jogador aguenta 6 hits
+            @vida = 6
+            @atacado = false
+
       end
 
       #Movimentação para esquerda
@@ -93,7 +101,10 @@ class Jogador
             @espada.atacando = true
             if @podeSom
                 @somEspada.play(0.5)
+<<<<<<< HEAD
                 @somVoz.play(0.5)
+=======
+>>>>>>> f4c46446c79dd05094dd494c24eaae747f157873
                 @podeSom = false
             end
 
@@ -103,6 +114,7 @@ class Jogador
                   @movAtaque = -100
             end
       end
+<<<<<<< HEAD
 
       #Faz com que o jogador fique em uma posição valida no mapa
       def posicaoValida
@@ -113,7 +125,23 @@ class Jogador
           end
       end
 
+=======
+      #em contato com monstro, afasta o jogador e diminui uma vida
+      def podePerdeVida
+          if @atacado
+            @vida -= 1
+            if @QualLado
+                  @body.apply_impulse(CP::Vec2.new(-500.0, -200.0), CP::Vec2.new(0, 0))
+            else
+                  @body.apply_impulse(CP::Vec2.new(500.0, 200.0), CP::Vec2.new(0, 0))
+            end
+          end
+          @atacado = false
+      end
+>>>>>>> f4c46446c79dd05094dd494c24eaae747f157873
       def draw
+
+            podePerdeVida()
             #Fazer os membros balançarem para ambos os lados
             @ajustePuloEspada = 0
             if !@podePular
@@ -193,6 +221,7 @@ class Jogador
 
             @shape.u = FRICTION
             @shape.e = ELASTICITY
+            @shape.object = self
 
             @space.add_body(@body)
             @space.add_shape(@shape)
