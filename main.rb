@@ -77,6 +77,8 @@ class GameWindow < Gosu::Window
             @vidac1 = Gosu::Image.new("assets/heart/1.png")
             @vidac0 = Gosu::Image.new("assets/heart/0.png")
 
+            @telainicial = Gosu::Image.new('assets/telainicial.png')
+
       end
 
       def button_down(id)
@@ -218,7 +220,6 @@ class GameWindow < Gosu::Window
             @fontmine.draw("Game Over", 180, 150, 2)
             @jogando = false
           else #telainicial do jogo
-              @telainicial = Gosu::Image.new('assets/telainicial.png')
               @telainicial.draw(0,0,1)
               @font.draw("Aperte espa\u{E7}o para iniciar", 50, 50, 2)
               @fontmine.draw("Mine", 180,150, 2)
