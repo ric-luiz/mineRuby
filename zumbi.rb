@@ -28,7 +28,7 @@ class Zumbi
             @movimentacao = 0.0
 
             #Define para que lado a cabeça do personagem vai virar
-            @lado_movimentacao = 1
+            @lado_movimentacao = 5
 
             #Construindo o conjunto de Elementos para detectar a colisão entre a espada/zumbi
             #Temos o atributo para saber se foi atacado, o objeto para manupular colisoes e
@@ -39,11 +39,16 @@ class Zumbi
             @vida = 5
             #pode perder vida?
             @podePerdeVida = true
+
+            #Sons do zumbi
+            @somZumbi = Gosu::Sample.new("assets/sounds/zombie.wav")
+            @tempoSom = 0
+            @podeEmitirSom = true
       end
 
       #Ir para direita
       def right
-            @body.p.x +=0.2
+            @body.p.x += 1
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = false
@@ -64,7 +69,7 @@ class Zumbi
 
       #Ir para esquerda
       def left
-            @body.p.x -=0.2
+            @body.p.x -= 1
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = true
@@ -80,7 +85,7 @@ class Zumbi
             if @podePerdeVida
               @vida -= 1
               @podePerdeVida = false
-            end            
+            end
       end
 
       #Persiga o jogador
@@ -103,9 +108,9 @@ class Zumbi
 
             #Fazer os membros balançarem para ambos os lados
             if @movimentacao >= 60
-                  @lado_movimentacao = -1
+                  @lado_movimentacao = -5
             elsif @movimentacao <= -60
-                  @lado_movimentacao = 1
+                  @lado_movimentacao = 5
             end
 
             #Define a posição dos elementos do corpo do personagem
@@ -140,6 +145,20 @@ class Zumbi
             #              @body.p.x + @shape.vert(0).x, @body.p.y + @shape.vert(0).y, @color,
             #              @body.p.x + @shape.vert(1).x, @body.p.y + @shape.vert(1).y, @color,
             #              z=3)
+      end
+
+      def somZumbis
+          @tempoSom = Gosu::milliseconds()/1000
+          #Emite o som do zumbi Automaticamente a cada 10 segundos
+          if @tempoSom%10 == 0 and @podeEmitirSom and @tempoSom != 0 then
+              @somZumbi.play(0.5)
+              @podeEmitirSom = false
+          end
+
+          #Esse bloco de codigo garante que seja possivel emitir o som a cada 10 segundos
+          if @tempoSom%11 == 0
+              @podeEmitirSom = true
+          end
       end
 
       #Fazendo os membro se mexerem

@@ -1,5 +1,5 @@
 class Jogador
-      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom,:espada
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -31,6 +31,8 @@ class Jogador
 
             #Instanciando Arma do Jogador
             @espada = Item.new(@space,:espada,@window)
+            #Essa variavel ajsuta a angulação da espada(lado direito) quando pula
+            @ajustePuloEspada = 0
 
             #ataque com a espada
             @ataque = [0,0]
@@ -45,18 +47,13 @@ class Jogador
             #Sons do personagem
             @somEspada = Gosu::Sample.new("assets/sounds/sword.flac")
             @somVoz = Gosu::Sample.new("assets/sounds/human.wav")
+            @somPulo = Gosu::Sample.new("assets/sounds/jump.wav")
             @podeSom = true
       end
 
       #Movimentação para esquerda
       def left
-            #Verifica se o personagem ainda pode anda para esquerda, ou seja se ele chegou
-            #no limite esquerdo do mapa
-            if @body.p.x > 0
-                  @body.apply_impulse(CP::Vec2.new(-4.0, 0), CP::Vec2.new(0, 0))
-            else
-                  @body.p.x = 0
-            end
+            @body.apply_impulse(CP::Vec2.new(-4.0, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = true
@@ -64,13 +61,7 @@ class Jogador
 
       #Movimentação para Direita
       def right
-            #Verifica se o personagem ainda pode anda para direita, ou seja se ele chegou
-            #no limite direito do mapa
-            if @body.p.x < 770
-                  @body.apply_impulse(CP::Vec2.new(4.0, 0), CP::Vec2.new(0, 0))
-            else
-                  @body.p.x = 770
-            end
+            @body.apply_impulse(CP::Vec2.new(4.0, 0), CP::Vec2.new(0, 0))
             movimentacaoMembros()
             #Lado para qual o personagem deve virar o rosto
             @QualLado = false
@@ -91,7 +82,7 @@ class Jogador
       def jump
             if @podePular and @body.p.y+60 < @particula.body.p.y
                   @body.apply_impulse(CP::Vec2.new(0.0, -700.0), CP::Vec2.new(0, 0))
-                  @somVoz.play(0.5)
+                  @somPulo.play(0.5)
             end
             #Variavel para verificar se o personagem está no chão
             @podePular = false
@@ -99,9 +90,10 @@ class Jogador
 
       #Vamos atacar os inimigos com a nossa espada :)
       def atacar
-
+            @espada.atacando = true
             if @podeSom
-                @somEspada.play(0.5)                
+                @somEspada.play(0.5)
+                @somVoz.play(0.5)
                 @podeSom = false
             end
 
@@ -112,9 +104,22 @@ class Jogador
             end
       end
 
+      #Faz com que o jogador fique em uma posição valida no mapa
+      def posicaoValida
+          if @body.p.x > 770
+              @body.p.x = 770
+          elsif @body.p.x < 0
+              @body.p.x = 0
+          end
+      end
+
       def draw
             #Fazer os membros balançarem para ambos os lados
-            if @movimentacao >= 60
+            @ajustePuloEspada = 0
+            if !@podePular
+                  @movimentacao = 60
+                  @ajustePuloEspada = -20
+            elsif @movimentacao >= 60
                   @lado_movimentacao = -1
             elsif @movimentacao <= -60
                   @lado_movimentacao = 1
@@ -123,6 +128,9 @@ class Jogador
             if @movAtaque != 0
                   movimentoAtaque
             end
+
+            #Faz com que o personagem sempre esteja em uma posição valida
+            posicaoValida()
 
             #Define a posição dos elementos do corpo do personagem
             definirPosicao()
@@ -137,7 +145,7 @@ class Jogador
                   @espada.posicaoEspada(-100,@movimentacao+@movAtaque/2-10)
             else
                   @r_cabeca.draw_rot(@posicaoCabecaX,@posicaoCabecaY,2,0,0.5,0.5)
-                  @espada.posicaoEspada(0,@movimentacao+@movAtaque/2)
+                  @espada.posicaoEspada(0,@movimentacao+@movAtaque/2+@ajustePuloEspada)
             end
 
             ###########################Desenha o tronco###################################

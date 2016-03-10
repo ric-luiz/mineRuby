@@ -43,10 +43,6 @@ class GameWindow < Gosu::Window
             #Instanciando o Jogador
             @jogador = Jogador.new(@physical.space,self,@world)
 
-            #Instanciando o Zumbi
-            # @zumbi = Zumbi.new(@physical.space,self)
-            # @esqueleto = Esqueleto.new(@physical.space)
-
             #Retirar/manipular os inimigos do jogo
             @inimigos = []
 
@@ -55,6 +51,7 @@ class GameWindow < Gosu::Window
             @font = Gosu::Font.new(45)
             @fontmine = Gosu::Font.new(125)
             @fontpainel = Gosu::Font.new(40)
+            @telainicial = Gosu::Image.new('assets/telainicial.png')
 
             #Chamando todas as colisões entre os objetos do jogo
             colisao()
@@ -64,8 +61,9 @@ class GameWindow < Gosu::Window
             @podeColocarInimigo = true
 
             #musicas do background
-            @somBackground = Gosu::Sample.new("assets/sounds/minecraft2.wav")
+            @somBackground = Gosu::Sample.new("assets/sounds/minecraft1.ogg")
             @somBackground.play(1,1,true)
+
       end
 
       def button_down(id)
@@ -78,6 +76,7 @@ class GameWindow < Gosu::Window
                 inimigos.podePerdeVida = true if id == Gosu::KbS
              end
              @jogador.podeSom = true
+              @jogador.espada.atacando = false
       end
 
       def update
@@ -93,28 +92,29 @@ class GameWindow < Gosu::Window
                         @jogador.jump() if button_down?(Gosu::KbSpace)
                         @jogador.atacar() if button_down?(Gosu::KbS)
 
-                        #########bloco correspondente aos inimigos do jogo############
-                        #o bloco abaixo é responsável por fazer todos os inimigos perseguirem o jogador e caso a vida do inimigo chegue a zero ele é retirado do jogo
-                        iterador = 0
-                        @inimigos.each do |inimigos|
-                           inimigos.perseguir(@jogador.body.p.x,@jogador.body.p.y)
-
-                           #Os inimigos são apagados caso a vida chegue a zero ou ele caia pelas bordas do mapa
-                           if inimigos.vida <= 0 or inimigos.body.p.y > TOTAL_HEIGHT_TILE
-                               @physical.space.remove_body(inimigos.body)
-                               @physical.space.remove_shape(inimigos.shape)
-                               @inimigos.delete_at(iterador)
-                           end
-                           iterador += 1
-                        end
-                        ##############################################################
-
-                        # @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
                         #Importante para da andamento nos elementos da fisica no space
                         @physical.space.step(@physical.dt)
-
-                      #  @esqueleto.perseguir(@jogador.body.p.x,@jogador.body.p.y)
                   end
+
+                  #########bloco correspondente aos inimigos do jogo############
+                  #o bloco abaixo é responsável por fazer todos os inimigos perseguirem o jogador e caso a vida do inimigo chegue a zero ele é retirado do jogo
+                  iterador = 0
+                  @inimigos.each do |inimigos|
+                     inimigos.perseguir(@jogador.body.p.x,@jogador.body.p.y)
+
+                     #Os inimigos são apagados caso a vida chegue a zero ou ele caia pelas bordas do mapa
+                     if inimigos.vida <= 0 or inimigos.body.p.y > TOTAL_HEIGHT_TILE
+                         @physical.space.remove_body(inimigos.body)
+                         @physical.space.remove_shape(inimigos.shape)
+                         @inimigos.delete_at(iterador)
+                     end
+                     iterador += 1
+
+                     #Emitir sons do zumbi
+                     inimigos.somZumbis()
+                  end
+                  ##############################################################
+
 
                   moverJogadorRelacaoMapa()
                   manterObejtosRelacaoMapa()
@@ -191,13 +191,11 @@ class GameWindow < Gosu::Window
               @inimigos.each do |inimigos|
                  inimigos.draw
               end
-              # @esqueleto.draw
               @fontpainel.draw("Vida: ", 10, 10, 2)
           elsif @vida_personagem == 0
             @fontmine.draw("Game Over", 180, 150, 2)
             @jogando = false
           else
-              @telainicial = Gosu::Image.new('assets/telainicial.png')
               @telainicial.draw(0,0,1)
               @font.draw("Aperte espa\u{E7}o para iniciar", 50, 50, 2)
               @fontmine.draw("Mine", 180,150, 2)

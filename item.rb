@@ -1,4 +1,5 @@
 class Item
+      attr_accessor :atacando
       def initialize(space,tipo,window)
             @tiled = Tileset.new('assets/item.json')
             @espada = @tiled.frame(0)
@@ -23,6 +24,9 @@ class Item
 
             # #Usado para depuração de shapes do chipmunk
             @window = window
+
+            #saber se o item esta sendo usado para atacar
+            @atacando = false
       end
 
       def draw(x,y)
@@ -68,6 +72,7 @@ class Item
 
             @shape = CP::Shape::Poly.new(@body, @forma, CP::Vec2.new(0,0))
             @shape.collision_type = @tipo
+            @shape.object = self
 
             @space.add_shape(@shape)
 
