@@ -46,7 +46,7 @@ class Jogador
             @somEspada = Gosu::Sample.new("assets/sounds/sword.flac")
             @somVoz = Gosu::Sample.new("assets/sounds/human.wav")
             @podeSom = true
-
+            #jogador aguenta 6 hits
             @vida = 6
             @atacado = false
 
@@ -115,7 +115,7 @@ class Jogador
                   @movAtaque = -100
             end
       end
-
+      #em contato com monstro, afasta o jogador e diminui uma vida
       def podePerdeVida
           if @atacado
             @vida -= 1

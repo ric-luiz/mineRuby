@@ -68,7 +68,7 @@ class GameWindow < Gosu::Window
             @somBackground = Gosu::Sample.new("assets/sounds/minecraft2.wav")
             @somBackground.play(1,1,true)
 
-            #vida coracao
+            #imagens coraçao(vida)
             @vidac6 = Gosu::Image.new("assets/heart/6.png")
             @vidac5 = Gosu::Image.new("assets/heart/5.png")
             @vidac4 = Gosu::Image.new("assets/heart/4.png")
@@ -196,13 +196,14 @@ class GameWindow < Gosu::Window
       end
 
       def draw
-          if @jogando and @jogador.vida >= 1
+          if @jogando and @jogador.vida >= 1 #se o jogo foi iniciado e o jogador ainda possui vidas
               @world.draw
               @jogador.draw
               @inimigos.each do |inimigos|
                  inimigos.draw
               end
               # @esqueleto.draw
+              #painel e corações
               @fontpainel.draw("Vida: ", 10, 10, 2)
               @fontpainel.draw("Score: ", 10, 45, 2)
               @vidac6.draw(100, 20, 2) if @jogador.vida == 6
@@ -216,7 +217,7 @@ class GameWindow < Gosu::Window
           elsif @jogador.vida <= 0
             @fontmine.draw("Game Over", 180, 150, 2)
             @jogando = false
-          else
+          else #telainicial do jogo
               @telainicial = Gosu::Image.new('assets/telainicial.png')
               @telainicial.draw(0,0,1)
               @font.draw("Aperte espa\u{E7}o para iniciar", 50, 50, 2)
@@ -235,6 +236,7 @@ class GameWindow < Gosu::Window
              @jogador.particula = par
              @jogador.podePular = true
           end
+          #se o jogador entrar em contato com um zumbi, perderá vida
           @collision2 = CollisionHandlerJogador.new
           @physical.space.add_collision_handler(:jogador, :zumbi,@collision2)
 
