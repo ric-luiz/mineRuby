@@ -10,6 +10,7 @@ require_relative 'world.rb'
 require_relative 'physicalWorld.rb'
 require_relative 'item.rb'
 require_relative 'collisionHandlerZumbi.rb'
+require_relative 'collisionHandlerJogador.rb'
 
 ##################Propriedades do Cenario(World)###################
 WIDTH = 800
@@ -66,6 +67,16 @@ class GameWindow < Gosu::Window
             #musicas do background
             @somBackground = Gosu::Sample.new("assets/sounds/minecraft2.wav")
             @somBackground.play(1,1,true)
+
+            #vida coracao
+            @vidac6 = Gosu::Image.new("assets/heart/6.png")
+            @vidac5 = Gosu::Image.new("assets/heart/5.png")
+            @vidac4 = Gosu::Image.new("assets/heart/4.png")
+            @vidac3 = Gosu::Image.new("assets/heart/3.png")
+            @vidac2 = Gosu::Image.new("assets/heart/2.png")
+            @vidac1 = Gosu::Image.new("assets/heart/1.png")
+            @vidac0 = Gosu::Image.new("assets/heart/0.png")
+
       end
 
       def button_down(id)
@@ -185,7 +196,7 @@ class GameWindow < Gosu::Window
       end
 
       def draw
-          if @jogando
+          if @jogando and @jogador.vida >= 1
               @world.draw
               @jogador.draw
               @inimigos.each do |inimigos|
@@ -193,7 +204,16 @@ class GameWindow < Gosu::Window
               end
               # @esqueleto.draw
               @fontpainel.draw("Vida: ", 10, 10, 2)
-          elsif @vida_personagem == 0
+              @fontpainel.draw("Score: ", 10, 45, 2)
+              @vidac6.draw(100, 20, 2) if @jogador.vida == 6
+              @vidac5.draw(100, 20, 2) if @jogador.vida == 5
+              @vidac4.draw(100, 20, 2) if @jogador.vida == 4
+              @vidac3.draw(100, 20, 2) if @jogador.vida == 3
+              @vidac2.draw(100, 20, 2) if @jogador.vida == 2
+              @vidac1.draw(100, 20, 2) if @jogador.vida == 1
+              @vidac0.draw(100, 20, 2) if @jogador.vida == 0
+
+          elsif @jogador.vida <= 0
             @fontmine.draw("Game Over", 180, 150, 2)
             @jogando = false
           else
@@ -215,6 +235,9 @@ class GameWindow < Gosu::Window
              @jogador.particula = par
              @jogador.podePular = true
           end
+          @collision2 = CollisionHandlerJogador.new
+          @physical.space.add_collision_handler(:jogador, :zumbi,@collision2)
+
       end
 end
 

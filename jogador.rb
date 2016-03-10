@@ -1,5 +1,5 @@
 class Jogador
-      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -46,6 +46,10 @@ class Jogador
             @somEspada = Gosu::Sample.new("assets/sounds/sword.flac")
             @somVoz = Gosu::Sample.new("assets/sounds/human.wav")
             @podeSom = true
+
+            @vida = 6
+            @atacado = false
+
       end
 
       #Movimentação para esquerda
@@ -101,7 +105,7 @@ class Jogador
       def atacar
 
             if @podeSom
-                @somEspada.play(0.5)                
+                @somEspada.play(0.5)
                 @podeSom = false
             end
 
@@ -112,7 +116,20 @@ class Jogador
             end
       end
 
+      def podePerdeVida
+          if @atacado
+            @vida -= 1
+            if @QualLado
+                  @body.apply_impulse(CP::Vec2.new(-500.0, -200.0), CP::Vec2.new(0, 0))
+            else
+                  @body.apply_impulse(CP::Vec2.new(500.0, 200.0), CP::Vec2.new(0, 0))
+            end
+          end
+          @atacado = false
+      end
       def draw
+
+            podePerdeVida()
             #Fazer os membros balançarem para ambos os lados
             if @movimentacao >= 60
                   @lado_movimentacao = -1
@@ -185,6 +202,7 @@ class Jogador
 
             @shape.u = FRICTION
             @shape.e = ELASTICITY
+            @shape.object = self
 
             @space.add_body(@body)
             @space.add_shape(@shape)
