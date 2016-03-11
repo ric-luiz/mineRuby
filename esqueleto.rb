@@ -6,7 +6,7 @@ class Esqueleto
 
             #Montando as  imagens das partes do corpo do personagem
             @cabeca = @tiled.frame(13)
-            @r_cabeca = Gosu::Image.new('skeleton_headr.png')
+            @r_cabeca = @tiled.frame(14)
             @tronco = @tiled.frame(12)
 
             #Angulo da movimetação dos braços
@@ -42,9 +42,9 @@ class Esqueleto
             @podePerdeVida = true
 
             #Sons do esqueleto
-            # @somZumbi = Gosu::Sample.new("assets/sounds/zombie.wav")
-            # @tempoSom = 0
-            # @podeEmitirSom = true
+            @somEsqueleto = Gosu::Sample.new("assets/sounds/esqueleto.wav")
+            @tempoSom = 0
+            @podeEmitirSom = true
       end
 
       def right
@@ -85,10 +85,6 @@ class Esqueleto
               @vida -= 1
               @podePerdeVida = false
             end
-      end
-
-      def jump
-
       end
 
       def perseguir(jogX,jogY)
@@ -143,17 +139,17 @@ class Esqueleto
       end
 
       def sons
-          # @tempoSom = Gosu::milliseconds()/1000
-          # #Emite o som do zumbi Automaticamente a cada 10 segundos
-          # if @tempoSom%10 == 0 and @podeEmitirSom and @tempoSom != 0 then
-          #     @somZumbi.play(0.5)
-          #     @podeEmitirSom = false
-          # end
-          #
-          # #Esse bloco de codigo garante que seja possivel emitir o som a cada 10 segundos
-          # if @tempoSom%11 == 0
-          #     @podeEmitirSom = true
-          # end
+          @tempoSom = Gosu::milliseconds()/1000
+          #Emite o som do zumbi Automaticamente a cada 10 segundos
+          if @tempoSom%10 == 0 and @podeEmitirSom and @tempoSom != 0 then
+              @somEsqueleto.play(0.5)
+              @podeEmitirSom = false
+          end
+
+          #Esse bloco de codigo garante que seja possivel emitir o som a cada 10 segundos
+          if @tempoSom%11 == 0
+              @podeEmitirSom = true
+          end
       end
 
       #Fazendo os membro se mexerem

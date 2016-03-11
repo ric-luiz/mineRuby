@@ -11,6 +11,7 @@ require_relative 'physicalWorld.rb'
 require_relative 'item.rb'
 require_relative 'collisionHandlerInimigos.rb'
 require_relative 'collisionHandlerJogador.rb'
+require_relative 'collisionHandlerLarva.rb'
 
 ##################Propriedades do Cenario(World)###################
 WIDTH = 800
@@ -21,6 +22,7 @@ TILE_HEIGTH = MAP_WORLD['tileheight']
 TOTAL_WIDTH_TILE = MAP_WORLD['width'] * MAP_WORLD['tilewidth']
 TOTAL_HEIGHT_TILE = MAP_WORLD['height'] * MAP_WORLD['tileheight']
 SPEED_MAP = 2
+PARTICULAS_ARRAY = [1,3,6,8,10,11,13,14,15,20,22,25,29,32,33,34,41,44,47,48,50,51,52,53,60,64,66,69,70,71,72,75,79,85,88,89,90,92,94]
 ###################################################################
 
 ##################Propriedaes da Fisica(PhysicalWorld)#############
@@ -63,7 +65,7 @@ class GameWindow < Gosu::Window
             @podeColocarInimigo = true
 
             #musicas do background
-            @somBackground = Gosu::Sample.new("assets/sounds/minecraft1.ogg")
+            @somBackground = Gosu::Sample.new("assets/sounds/minecraft.ogg")
             @somBackground.play(1,1,true)
 
             #imagens coraçao(vida)
@@ -144,11 +146,11 @@ class GameWindow < Gosu::Window
                     #escolhe aleatoriamente entre os zumbis e esqueletos
                     if rand(10) < 8
                       zumbi = Zumbi.new(@physical.space,self)
-                      zumbi.body.p.x = rand(TOTAL_WIDTH_TILE)
+                      zumbi.body.p.x = rand(TOTAL_WIDTH_TILE - 100 + 50)
                       @inimigos.push(zumbi)
                     else
                       esqueleto = Esqueleto.new(@physical.space,self)
-                      esqueleto.body.p.x = rand(TOTAL_WIDTH_TILE)
+                      esqueleto.body.p.x = rand(TOTAL_WIDTH_TILE - 100 + 50)
                       @inimigos.push(esqueleto)
                     end
                     @podeColocarInimigo = false
@@ -167,9 +169,9 @@ class GameWindow < Gosu::Window
       #   junto com o mapa.
       def moverJogadorRelacaoMapa
             #Verifica se esta indo para esquerda. Sempre em relação ao personagem
-            if WIDTH - @jogador.body.p.x > WIDTH-300
+            if WIDTH - @jogador.body.p.x > WIDTH - 300
                   #condição importante. Evita que o personagem volte ao chegar na ponta do mapa
-                  if @world.limites_mapa < WIDTH
+                  if @world.limites_mapa < TOTAL_WIDTH_TILE-800
                         @jogador.body.p.x += SPEED_MAP
                   end
                   @world.map_left(SPEED_MAP)
@@ -244,6 +246,9 @@ class GameWindow < Gosu::Window
           @collision2 = CollisionHandlerJogador.new
           @physical.space.add_collision_handler(:jogador, :zumbi,@collision2)
           @physical.space.add_collision_handler(:jogador, :esqueleto,@collision2)
+
+          @collision3 = CollisionHandlerLarva.new
+          @physical.space.add_collision_handler(:jogador, :larva,@collision3)
 
       end
 end

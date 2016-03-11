@@ -1,5 +1,5 @@
 class Jogador
-      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado,:espada,:qualLadoInimigo
+      attr_accessor :body,:shape,:limites_mapa_jogador,:podePular,:particula,:podeSom, :vida,:atacado,:espada,:qualLadoInimigo,:pisouLarva
       def initialize(space,win,world)
             #Recuperando os pedaços do corpo do personagem
             @tiled = Tileset.new('assets/personagens.json')
@@ -44,11 +44,15 @@ class Jogador
             @podePular = false
             @particula = ''
 
+            #Verifica se o jogador pisou na larva
+            @pisouLarva = false
+
             #Sons do personagem
             @somEspada = Gosu::Sample.new("assets/sounds/sword.flac")
             @somVoz = Gosu::Sample.new("assets/sounds/human.wav")
             @somPulo = Gosu::Sample.new("assets/sounds/jump.wav")
             @podeSom = true
+
             #jogador aguenta 6 hits
             @vida = 6
             @atacado = false
@@ -80,6 +84,15 @@ class Jogador
                         @movimentacao -= 1
                   end
             end
+      end
+
+      #Faz a ação do jogador quando ele tocar na larva
+      def jogadorPisouLarva
+          if @pisouLarva
+              @vida -= 1
+              @body.apply_impulse(CP::Vec2.new(0.0, -700.0), CP::Vec2.new(0, 0))
+          end
+          @pisouLarva = false
       end
 
       #Ação de pulo do personagem
@@ -133,7 +146,10 @@ class Jogador
 
       def draw
 
+            #Ambas as funções retiram vida do personagem
             podePerdeVida()
+            jogadorPisouLarva()
+
             #Fazer os membros balançarem para ambos os lados
             @ajustePuloEspada = 0
             if !@podePular

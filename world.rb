@@ -9,7 +9,7 @@ class World
             #Posições do mapa
             @map_x = 0
             @map_y = 0
-            @limites_mapa = WIDTH
+            @limites_mapa = TOTAL_WIDTH_TILE - 800
 
             #Recuperando o Array com as camadas
             @camadas = MAP_WORLD['layers']
@@ -39,7 +39,7 @@ class World
 
       #Faz o mapa ir para esquerda
       def map_left(x)
-            if @limites_mapa <= WIDTH - x
+            if @limites_mapa <= TOTAL_WIDTH_TILE - 800 - x
                   @limites_mapa += x
                   @map_x += x
                   #Verifica se o mapa esta se movendo. É usada para as particulas
@@ -54,11 +54,11 @@ class World
             l=0
             for layers in @camadas
                   for i in layers['data']
-                        if i > 0 and (i != 22 and i != 50)
+                        if i > 0 and !PARTICULAS_ARRAY.include?(i)
                               x = @posicoes[v][0]['posicao'][0].to_i
                               y = @posicoes[v][0]['posicao'][1].to_i
                               @img[i-1].draw(x+@map_x, y+@map_y, l)
-                        elsif i == 22 or i == 50
+                        elsif PARTICULAS_ARRAY.include?(i)
                               #caso seja uma particula (objeto com fisica) desenhos ele
                               if @movendoMapaRigth
                                     @posicoes[v].body.p.x -= SPEED_MAP
@@ -92,10 +92,15 @@ class World
                         end
                         #caso o elemento seja algo solido inserimos ele como uma
                         #particula (objeto com fisica) no mapa
-                        if i == 22 or i == 50
+                        if PARTICULAS_ARRAY.include?(i)
                               x = @c * TILE_WIDTH
                               y = @r * TILE_HEIGTH
-                              inserirSpace(x,y)
+                              #Vamos ver se a particula é larva ou nao
+                              tipo = :particula
+                              if i == 64
+                                tipo = :larva
+                              end
+                              inserirSpace(x,y,tipo)
                               #Os parametros @forma e @windows, servem para depuração das shapes do shipmunk
                               particula = Particula.new(@body,@img[i-1],@forma,@window)
                               @posicoes << particula
@@ -111,7 +116,7 @@ class World
       end
 
       # Cria a forma e corpo e adiciona no space
-      def inserirSpace(x,y)
+      def inserirSpace(x,y,tipo)
             #As particulas são elementos solidos do mapa
             @body = CP::Body.new_static()
 
@@ -119,9 +124,10 @@ class World
             @forma = [CP::Vec2.new(0.0, 0.0), CP::Vec2.new(0.0, 50.0),
                      CP::Vec2.new(50.0, 50.0), CP::Vec2.new(50.0, 0.0)]
             shape = CP::Shape::Poly.new(@body, @forma, CP::Vec2.new(0,0))
-            shape.collision_type = :particula
+            shape.collision_type = tipo
             shape.u = FRICTION
             shape.e = ELASTICITY
+            shape.object = self
 
             @space.add_shape(shape)
       end

@@ -8,7 +8,7 @@ class Tileset
 
       #Define qual frame será renderizado
       def frame(posicao)
-          f = @json['frames'][posicao]['frame']
+          f = @json['frames'][posicao]['frame']          
           @main_image.subimage(
           f['x'], f['y'], f['w'], f['h'])
       end

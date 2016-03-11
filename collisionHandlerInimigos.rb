@@ -2,7 +2,7 @@
 class CollisionHandlerInimigos
   def begin(a, b, arbiter)
       if a.object.atacando
-        b.object.atacado = true
+        b.object.atacado = true        
       end
   end
 end
