@@ -220,7 +220,7 @@ class Jogador
       def definirCorpo
             @body = CP::Body.new(10.0,1.0/0)
 
-            @body.p = CP::Vec2.new(800, 100)
+            @body.p = CP::Vec2.new(500, 100)
 
             @shape_verts = [CP::Vec2.new(0.0, 0.0), CP::Vec2.new(0.0, 70),
                             CP::Vec2.new(25, 70), CP::Vec2.new(25, 0.0)]

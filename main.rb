@@ -80,7 +80,12 @@ class GameWindow < Gosu::Window
 
       def button_down(id)
             close if id == Gosu::KbEscape
-            @jogando=true if id == Gosu::KbSpace
+            @jogando=true if id == Gosu::KbSpace and @jogador.vida >= 1
+
+            #Reinicia o jogo caso tenha dado gameover
+            if !@jogando and id == Gosu::KbSpace
+                reiniciarJogo
+            end
       end
 
       def button_up(id)
@@ -91,8 +96,31 @@ class GameWindow < Gosu::Window
               @jogador.espada.atacando = false
       end
 
+      #Reiniciar todo o jogo
+      def reiniciarJogo
+
+          #Resetando score e atributos do jogador
+          @score = 0
+          @jogador.body.p.x = rand(TOTAL_WIDTH_TILE)
+          @jogador.body.p.y = 0
+          @jogador.vida = 6
+
+          #Tirando os inimigos do jogo
+          iterador = 0
+          @inimigos.each do |inimigos|
+            @physical.space.remove_body(inimigos.body)
+            @physical.space.remove_shape(inimigos.shape)
+            @inimigos.delete_at(iterador)
+            @score = 0
+            iterador += 1
+          end
+
+          #fazendo o jogo rodar novamente
+          @jogando = true
+      end
+
       def update
-            if @jogando
+            if @jogando and @jogador.vida >= 1
                   6.times do
                         if button_down?(Gosu::KbLeft)
                               @jogador.left()
@@ -146,11 +174,11 @@ class GameWindow < Gosu::Window
                     #escolhe aleatoriamente entre os zumbis e esqueletos
                     if rand(10) < 8
                       zumbi = Zumbi.new(@physical.space,self)
-                      zumbi.body.p.x = rand(TOTAL_WIDTH_TILE - 100 + 50)
+                      zumbi.body.p.x = (@world.limites_mapa - 2400) + rand(TOTAL_WIDTH_TILE)
                       @inimigos.push(zumbi)
                     else
                       esqueleto = Esqueleto.new(@physical.space,self)
-                      esqueleto.body.p.x = rand(TOTAL_WIDTH_TILE - 100 + 50)
+                      esqueleto.body.p.x = (@world.limites_mapa - 2400) + rand(TOTAL_WIDTH_TILE)
                       @inimigos.push(esqueleto)
                     end
                     @podeColocarInimigo = false
@@ -220,7 +248,9 @@ class GameWindow < Gosu::Window
               @vidac0.draw(100, 20, 2) if @jogador.vida == 0
 
           elsif @jogador.vida <= 0
-            @fontmine.draw("Game Over", 180, 150, 2)
+            @fontmine.draw("Game Over", 150, 150, 2)
+            @fontpainel.draw("Score: #{@score}", 150, 300, 2)
+            @fontpainel.draw("Aperte 'Espaço' para Jogar Novamente", 150, 400, 2)
             @jogando = false
           else
               @telainicial.draw(0,0,1)
